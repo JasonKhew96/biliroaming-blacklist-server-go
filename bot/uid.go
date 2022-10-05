@@ -99,11 +99,19 @@ func (tg *TelegramBot) genUidResp(uid int64, isMarkdown bool) (string, *gotgbot.
 	}
 
 	if user.IsWhitelist {
-		text += "该用户是*白名单*用户\n"
+		if isMarkdown {
+			text += "该用户是*白名单*用户\n"
+		} else {
+			text += "该用户是白名单用户\n"
+		}
 	}
 
 	if isBlacklisted {
-		text += fmt.Sprintf("黑名单解除时间: `%s`\n", EscapeMarkdownV2(banUntil.In(location).Format(TIME_FORMAT)))
+		if isMarkdown {
+			text += fmt.Sprintf("黑名单解除时间: `%s`\n", EscapeMarkdownV2(banUntil.In(location).Format(TIME_FORMAT)))
+		} else {
+			text += fmt.Sprintf("黑名单解除时间: %s\n", EscapeMarkdownV2(banUntil.In(location).Format(TIME_FORMAT)))
+		}
 	}
 
 	replyMarkup := genUidInlineKeyboard(user.UID, isBlacklisted)
@@ -252,7 +260,7 @@ func (tg *TelegramBot) callbackUidResp(b *gotgbot.Bot, ctx *ext.Context) error {
 		if err != nil {
 			return err
 		}
-		text, replyMarkup, err := tg.genUidResp(uid, false)
+		text, replyMarkup, err := tg.genUidResp(uid, true)
 		if err != nil {
 			_, err := ctx.CallbackQuery.Answer(b, &gotgbot.AnswerCallbackQueryOpts{
 				Text: "查询失败",
