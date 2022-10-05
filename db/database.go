@@ -182,7 +182,6 @@ func (db *Database) GetReport(reportId int) (*models.Report, error) {
 
 func New(config config.DatabaseConfig) (*Database, error) {
 	// boil.DebugMode = true
-	log.Printf("host=%s port=%d dbname=%s user=%s pass=%s", config.Host, config.Port, config.Name, config.User, config.Pass)
 	db, err := sql.Open("postgres", fmt.Sprintf("host=%s port=%d dbname=%s user=%s password=%s", config.Host, config.Port, config.Name, config.User, config.Pass))
 	if err != nil {
 		return nil, err
