@@ -12,7 +12,7 @@ import (
 	"github.com/PaulSonOfLars/gotgbot/v2/ext"
 )
 
-func genUidInlineKeyboard(uid int64, isBlacklist bool) gotgbot.InlineKeyboardMarkup {
+func genUidInlineKeyboard(uid int64, isBlacklist bool) *gotgbot.InlineKeyboardMarkup {
 	inlineKeyboard := [][]gotgbot.InlineKeyboardButton{}
 	inlineKeyboard01 := []gotgbot.InlineKeyboardButton{
 		{
@@ -49,14 +49,12 @@ func genUidInlineKeyboard(uid int64, isBlacklist bool) gotgbot.InlineKeyboardMar
 		})
 	}
 
-	return gotgbot.InlineKeyboardMarkup{InlineKeyboard: inlineKeyboard}
+	return &gotgbot.InlineKeyboardMarkup{InlineKeyboard: inlineKeyboard}
 }
 
-func (tg *TelegramBot) genUidResp(uid int64) (string, *gotgbot.InlineKeyboardMarkup, error) {
+func (tg *TelegramBot) genUidResp(uid int64, isMarkdown bool) (string, *gotgbot.InlineKeyboardMarkup, error) {
 	user, err := tg.db.GetBiliUser(uid)
-	if err == sql.ErrNoRows {
-		return "未找到用户", nil, nil
-	} else if err != nil {
+	if err != nil {
 		return "", nil, err
 	}
 
@@ -69,12 +67,22 @@ func (tg *TelegramBot) genUidResp(uid int64) (string, *gotgbot.InlineKeyboardMar
 		banUntil = user.BanUntil.Time
 	}
 
-	text := fmt.Sprintf(
-		"uid: `%d`\n请求次数: `%d`\n最后请求时间: `%s`\n",
-		user.UID,
-		user.Counter,
-		user.ModifiedAt.In(location).Format(TIME_FORMAT),
-	)
+	var text string
+	if isMarkdown {
+		text = fmt.Sprintf(
+			"uid: `%d`\n请求次数: `%d`\n最后请求时间: `%s`\n",
+			user.UID,
+			user.Counter,
+			user.ModifiedAt.In(location).Format(TIME_FORMAT),
+		)
+	} else {
+		text = fmt.Sprintf(
+			"uid: %d\n请求次数: %d\n最后请求时间: %s\n",
+			user.UID,
+			user.Counter,
+			user.ModifiedAt.In(location).Format(TIME_FORMAT),
+		)
+	}
 
 	if user.IsWhitelist {
 		text += "该用户是*白名单*用户\n"
@@ -86,7 +94,7 @@ func (tg *TelegramBot) genUidResp(uid int64) (string, *gotgbot.InlineKeyboardMar
 
 	replyMarkup := genUidInlineKeyboard(user.UID, isBlacklisted)
 
-	return text, &replyMarkup, nil
+	return text, replyMarkup, nil
 }
 
 func (tg *TelegramBot) commandUid(b *gotgbot.Bot, ctx *ext.Context) error {
@@ -116,9 +124,11 @@ func (tg *TelegramBot) commandUid(b *gotgbot.Bot, ctx *ext.Context) error {
 		return err
 	}
 
-	text, replyMarkup, err := tg.genUidResp(uid)
-	if err != nil {
-		log.Println(err)
+	text, replyMarkup, err := tg.genUidResp(uid, true)
+	if err == sql.ErrNoRows {
+		_, err := ctx.EffectiveMessage.Reply(b, "未找到记录", nil)
+		return err
+	} else if err != nil {
 		_, err := ctx.EffectiveMessage.Reply(b, "查询失败", nil)
 		return err
 	}
@@ -199,9 +209,13 @@ func (tg *TelegramBot) callbackUidResp(b *gotgbot.Bot, ctx *ext.Context) error {
 		if err != nil {
 			return nil
 		}
-		text, replyMarkup, err := tg.genUidResp(uid)
-		if err != nil {
-			log.Println(err)
+		text, replyMarkup, err := tg.genUidResp(uid, false)
+		if err == sql.ErrNoRows {
+			_, err := ctx.CallbackQuery.Answer(b, &gotgbot.AnswerCallbackQueryOpts{
+				Text: "未找到记录",
+			})
+			return err
+		} else if err != nil {
 			_, err := ctx.CallbackQuery.Answer(b, &gotgbot.AnswerCallbackQueryOpts{
 				Text: "查询失败",
 			})
@@ -233,9 +247,13 @@ func (tg *TelegramBot) callbackUidResp(b *gotgbot.Bot, ctx *ext.Context) error {
 		if err != nil {
 			return err
 		}
-		text, replyMarkup, err := tg.genUidResp(uid)
-		if err != nil {
-			log.Println(err)
+		text, replyMarkup, err := tg.genUidResp(uid, false)
+		if err == sql.ErrNoRows {
+			_, err := ctx.CallbackQuery.Answer(b, &gotgbot.AnswerCallbackQueryOpts{
+				Text: "未找到记录",
+			})
+			return err
+		} else if err != nil {
 			_, err := ctx.CallbackQuery.Answer(b, &gotgbot.AnswerCallbackQueryOpts{
 				Text: "查询失败",
 			})
