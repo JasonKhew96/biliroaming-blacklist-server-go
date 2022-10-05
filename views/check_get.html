@@ -1,0 +1,27 @@
+{{template "partials/header" .}}
+
+<h1>{{.Title}}</h1>
+
+<form action="/check" method="post">
+    <input type="text" id="inputUid" name="uid" placeholder="208259" pattern="\d+" required>
+    <input type="submit" value="Submit">
+</form>
+
+<script>
+    const inputUid = document.querySelector('#inputUid');
+
+    inputUid.addEventListener('input', () => {
+        inputUid.setCustomValidity('');
+        inputUid.checkValidity();
+    });
+
+    inputUid.addEventListener('invalid', () => {
+        if (inputUid.value === '') {
+            inputUid.setCustomValidity('请输入用户 UID');
+        } else {
+            inputUid.setCustomValidity('格式错误');
+        }
+    });
+</script>
+
+{{template "partials/footer" .}}

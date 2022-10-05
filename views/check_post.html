@@ -1,0 +1,34 @@
+{{template "partials/header" .}}
+
+<h1>{{.Title}}</h1>
+
+{{ if .Error }}
+<div class="alert alert-primary" role="alert">
+    {{ .Error }}
+</div>
+{{ else }}
+<p>UID: {{ .Uid }}</p>
+<p>该用户是 <b>{{ if .BanUntil }}黑名单{{ else }}不是黑名单{{ end }}</b></p>
+{{ if .BanUntil }}
+<p>解封时间: <b>{{ .BanUntil }}</b></p>
+{{ end }}
+
+<table class="table">
+    <thead>
+        <tr>
+            <th scope="col">时间</th>
+            <th scope="col">描述</th>
+        </tr>
+    </thead>
+    <tbody>
+        {{ range .Records }}
+        <tr>
+            <td>{{ .Time }}</td>
+            <td>{{ .Description }}</td>
+        </tr>
+        {{ end }}
+    </tbody>
+</table>
+{{ end }}
+
+{{template "partials/footer" .}}
