@@ -6,6 +6,7 @@ import (
 	"log"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/PaulSonOfLars/gotgbot/v2"
 	"github.com/PaulSonOfLars/gotgbot/v2/ext"
@@ -57,6 +58,7 @@ func (tg *TelegramBot) commandAddAdmin(b *gotgbot.Bot, ctx *ext.Context) error {
 	err = tg.db.UpsertAdmin(&models.Admin{
 		ID:    id,
 		Level: int16(level),
+		ModifiedAt: time.Now(),
 	})
 	if err != nil {
 		log.Println("failed to insert admin: ", err.Error())
@@ -141,6 +143,7 @@ func (tg *TelegramBot) commandAlterAdmin(b *gotgbot.Bot, ctx *ext.Context) error
 	}
 
 	admin.Level = int16(level)
+	admin.ModifiedAt = time.Now()
 
 	err = tg.db.UpsertAdmin(admin)
 	if err != nil {

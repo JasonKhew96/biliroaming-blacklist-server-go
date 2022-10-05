@@ -22,7 +22,7 @@ type Database struct {
 // bilibili_users
 
 func (db *Database) UpsertBiliUser(biliUser *models.BilibiliUser) error {
-	return biliUser.Upsert(db.context, db.db, true, []string{"uid"}, boil.Whitelist("counter", "is_whitelist", "ban_until"), boil.Infer())
+	return biliUser.Upsert(db.context, db.db, true, []string{"uid"}, boil.Whitelist("counter", "is_whitelist", "ban_until", "modified_at"), boil.Infer())
 }
 
 func (db *Database) BanBiliUser(uid int64, banUntil time.Time) error {
@@ -31,6 +31,7 @@ func (db *Database) BanBiliUser(uid int64, banUntil time.Time) error {
 		return db.UpsertBiliUser(&models.BilibiliUser{
 			UID:      uid,
 			BanUntil: null.TimeFrom(banUntil),
+			ModifiedAt: time.Now(),
 		})
 	} else if err != nil {
 		return err
@@ -45,6 +46,7 @@ func (db *Database) UnbanBiliUser(uid int64) error {
 		return err
 	}
 	biliUser.BanUntil = null.TimeFrom(time.Time{})
+	biliUser.ModifiedAt = time.Now()
 	return db.UpsertBiliUser(biliUser)
 }
 
@@ -54,6 +56,7 @@ func (db *Database) WhiteBiliUser(uid int64, white bool) error {
 		return db.UpsertBiliUser(&models.BilibiliUser{
 			UID:         uid,
 			IsWhitelist: white,
+			ModifiedAt: time.Now(),
 		})
 	} else if err != nil {
 		return err
@@ -72,6 +75,7 @@ func (db *Database) IncBiliUserCounter(uid int64) (int64, error) {
 		if err := db.UpsertBiliUser(&models.BilibiliUser{
 			UID:     uid,
 			Counter: 1,
+			ModifiedAt: time.Now(),
 		}); err != nil {
 			return -1, err
 		}
@@ -85,7 +89,7 @@ func (db *Database) IncBiliUserCounter(uid int64) (int64, error) {
 // admins
 
 func (db *Database) UpsertAdmin(admin *models.Admin) error {
-	return admin.Upsert(db.context, db.db, true, []string{"id"}, boil.Whitelist("permissions"), boil.Infer())
+	return admin.Upsert(db.context, db.db, true, []string{"id"}, boil.Whitelist("permissions", "modified_at"), boil.Infer())
 }
 
 func (db *Database) GetAdmin(id int64) (*models.Admin, error) {
@@ -172,6 +176,7 @@ func (db *Database) UpdateReport(reportId int, fileType int16, fileId string) (i
 	}
 	report.FileType = fileType
 	report.FileID = fileId
+	report.ModifiedAt = time.Now()
 	return report.Update(db.context, db.db, boil.Infer())
 }
 
