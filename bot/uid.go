@@ -87,14 +87,14 @@ func (tg *TelegramBot) genUidResp(uid int64, isMarkdown bool) (string, *gotgbot.
 			"uid: `%d`\n请求次数: `%d`\n最后请求时间: `%s`\n",
 			user.UID,
 			user.Counter,
-			user.ModifiedAt.In(location).Format(TIME_FORMAT),
+			EscapeMarkdownV2(user.ModifiedAt.In(location).Format(TIME_FORMAT)),
 		)
 	} else {
 		text = fmt.Sprintf(
 			"uid: %d\n请求次数: %d\n最后请求时间: %s\n",
 			user.UID,
 			user.Counter,
-			user.ModifiedAt.In(location).Format(TIME_FORMAT),
+			EscapeMarkdownV2(user.ModifiedAt.In(location).Format(TIME_FORMAT)),
 		)
 	}
 
@@ -103,7 +103,7 @@ func (tg *TelegramBot) genUidResp(uid int64, isMarkdown bool) (string, *gotgbot.
 	}
 
 	if isBlacklisted {
-		text += fmt.Sprintf("黑名单解除时间: `%s`\n", banUntil.In(location).Format(TIME_FORMAT))
+		text += fmt.Sprintf("黑名单解除时间: `%s`\n", EscapeMarkdownV2(banUntil.In(location).Format(TIME_FORMAT)))
 	}
 
 	replyMarkup := genUidInlineKeyboard(user.UID, isBlacklisted)
@@ -217,7 +217,7 @@ func (tg *TelegramBot) callbackUidResp(b *gotgbot.Bot, ctx *ext.Context) error {
 			Text: "封禁成功",
 		})
 		if err != nil {
-			return nil
+			return err
 		}
 		text, replyMarkup, err := tg.genUidResp(uid, false)
 		if err != nil {
