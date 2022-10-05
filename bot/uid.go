@@ -29,22 +29,22 @@ func genUidInlineKeyboard(uid int64, isBlacklist bool) *gotgbot.InlineKeyboardMa
 	} else {
 		inlineKeyboard = append(inlineKeyboard, []gotgbot.InlineKeyboardButton{
 			{
-				Text:         "封禁 30 天",
-				CallbackData: fmt.Sprintf("uid_ban_%d_30", uid),
+				Text:         "封禁 3 个月",
+				CallbackData: fmt.Sprintf("uid_ban_%d_3", uid),
 			},
 			{
-				Text:         "封禁 60 天",
-				CallbackData: fmt.Sprintf("uid_ban_%d_60", uid),
+				Text:         "封禁 6 个月",
+				CallbackData: fmt.Sprintf("uid_ban_%d_6", uid),
 			},
 		})
 		inlineKeyboard = append(inlineKeyboard, []gotgbot.InlineKeyboardButton{
 			{
-				Text:         "封禁 180 天",
-				CallbackData: fmt.Sprintf("uid_ban_%d_180", uid),
+				Text:         "封禁 1 年",
+				CallbackData: fmt.Sprintf("uid_ban_%d_12", uid),
 			},
 			{
-				Text:         "封禁 360 天",
-				CallbackData: fmt.Sprintf("uid_ban_%d_360", uid),
+				Text:         "封禁 10 年",
+				CallbackData: fmt.Sprintf("uid_ban_%d_120", uid),
 			},
 		})
 	}
@@ -188,13 +188,12 @@ func (tg *TelegramBot) callbackUidResp(b *gotgbot.Bot, ctx *ext.Context) error {
 		if err != nil {
 			return err
 		}
-		daysStr := splits[1]
-		days, err := strconv.ParseInt(daysStr, 10, 64)
+		monthsStr := splits[1]
+		months, err := strconv.Atoi(monthsStr)
 		if err != nil {
 			return err
 		}
-		hours := days * 24
-		banUntil := time.Duration(hours) * time.Hour
+		banUntil := time.Now().AddDate(0, months, 0)
 		if err := tg.db.BanBiliUser(uid, banUntil); err != nil {
 			log.Println("failed to ban user: ", err.Error())
 			_, err = ctx.CallbackQuery.Answer(b, &gotgbot.AnswerCallbackQueryOpts{

@@ -25,17 +25,17 @@ func (db *Database) UpsertBiliUser(biliUser *models.BilibiliUser) error {
 	return biliUser.Upsert(db.context, db.db, true, []string{"uid"}, boil.Whitelist("counter", "is_whitelist", "ban_until"), boil.Infer())
 }
 
-func (db *Database) BanBiliUser(uid int64, banUntil time.Duration) error {
+func (db *Database) BanBiliUser(uid int64, banUntil time.Time) error {
 	biliUser, err := db.GetBiliUser(uid)
 	if err != nil && err == sql.ErrNoRows {
 		return db.UpsertBiliUser(&models.BilibiliUser{
 			UID:      uid,
-			BanUntil: null.TimeFrom(time.Now().Add(banUntil)),
+			BanUntil: null.TimeFrom(banUntil),
 		})
 	} else if err != nil {
 		return err
 	}
-	biliUser.BanUntil = null.TimeFrom(time.Now().Add(banUntil))
+	biliUser.BanUntil = null.TimeFrom(banUntil)
 	return db.UpsertBiliUser(biliUser)
 }
 
