@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"strconv"
 	"strings"
 	"time"
 )
@@ -54,4 +55,34 @@ func GetBiliAccInfo(uid int64) (*entity.SpaceAccInfoData, error) {
 	}
 
 	return data.Data, nil
+}
+
+func ParseDuration(duration string) (*time.Time, error) {
+	if len(duration) <= 1 {
+		return nil, fmt.Errorf("duration too short")
+	}
+
+	now := time.Now()
+
+	addStr := duration[:len(duration)-1]
+	add, err := strconv.Atoi(addStr)
+	if err != nil {
+		return nil, err
+	}
+
+	unit := duration[len(duration)-1:]
+
+	switch unit {
+	case "h", "H": // hour
+		newTime := now.Add(time.Hour * time.Duration(add))
+		return &newTime, nil
+	case "m", "M": // month
+		newTime := now.AddDate(0, add, 0)
+		return &newTime, nil
+	case "y", "Y": // year
+		newTime := now.AddDate(add, 0, 0)
+		return &newTime, nil
+	default:
+		return nil, fmt.Errorf("invalid duration unit: %s", unit)
+	}
 }
