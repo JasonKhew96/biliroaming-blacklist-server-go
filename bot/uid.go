@@ -54,7 +54,21 @@ func genUidInlineKeyboard(uid int64, isBlacklist bool) *gotgbot.InlineKeyboardMa
 
 func (tg *TelegramBot) genUidResp(uid int64, isMarkdown bool) (string, *gotgbot.InlineKeyboardMarkup, error) {
 	user, err := tg.db.GetBiliUser(uid)
-	if err != nil {
+	if err == sql.ErrNoRows {
+		var text string
+		if isMarkdown {
+			text = fmt.Sprintf(
+				"uid: `%d`",
+				uid,
+			)
+		} else {
+			text = fmt.Sprintf(
+				"uid: %d",
+				uid,
+			)
+		}
+		return text, genUidInlineKeyboard(user.UID, false), nil
+	} else if err != nil {
 		return "", nil, err
 	}
 
@@ -125,10 +139,7 @@ func (tg *TelegramBot) commandUid(b *gotgbot.Bot, ctx *ext.Context) error {
 	}
 
 	text, replyMarkup, err := tg.genUidResp(uid, true)
-	if err == sql.ErrNoRows {
-		_, err := ctx.EffectiveMessage.Reply(b, "未找到记录", nil)
-		return err
-	} else if err != nil {
+	if err != nil {
 		_, err := ctx.EffectiveMessage.Reply(b, "查询失败", nil)
 		return err
 	}
@@ -209,12 +220,7 @@ func (tg *TelegramBot) callbackUidResp(b *gotgbot.Bot, ctx *ext.Context) error {
 			return nil
 		}
 		text, replyMarkup, err := tg.genUidResp(uid, false)
-		if err == sql.ErrNoRows {
-			_, err := ctx.CallbackQuery.Answer(b, &gotgbot.AnswerCallbackQueryOpts{
-				Text: "未找到记录",
-			})
-			return err
-		} else if err != nil {
+		if err != nil {
 			_, err := ctx.CallbackQuery.Answer(b, &gotgbot.AnswerCallbackQueryOpts{
 				Text: "查询失败",
 			})
@@ -247,12 +253,7 @@ func (tg *TelegramBot) callbackUidResp(b *gotgbot.Bot, ctx *ext.Context) error {
 			return err
 		}
 		text, replyMarkup, err := tg.genUidResp(uid, false)
-		if err == sql.ErrNoRows {
-			_, err := ctx.CallbackQuery.Answer(b, &gotgbot.AnswerCallbackQueryOpts{
-				Text: "未找到记录",
-			})
-			return err
-		} else if err != nil {
+		if err != nil {
 			_, err := ctx.CallbackQuery.Answer(b, &gotgbot.AnswerCallbackQueryOpts{
 				Text: "查询失败",
 			})
