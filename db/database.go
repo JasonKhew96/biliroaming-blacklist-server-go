@@ -83,6 +83,7 @@ func (db *Database) IncBiliUserCounter(uid int64) (int64, error) {
 		return -1, err
 	}
 	biliUser.Counter++
+	biliUser.ModifiedAt = time.Now()
 	return biliUser.Update(db.context, db.db, boil.Infer())
 }
 
