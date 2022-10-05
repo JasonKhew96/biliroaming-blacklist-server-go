@@ -227,7 +227,7 @@ func (tg *TelegramBot) callbackUidResp(b *gotgbot.Bot, ctx *ext.Context) error {
 		if err != nil {
 			return err
 		}
-		text, replyMarkup, err := tg.genUidResp(uid, false)
+		text, replyMarkup, err := tg.genUidResp(uid, true)
 		if err != nil {
 			_, err := ctx.CallbackQuery.Answer(b, &gotgbot.AnswerCallbackQueryOpts{
 				Text: "查询失败",
