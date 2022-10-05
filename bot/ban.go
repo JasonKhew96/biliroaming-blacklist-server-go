@@ -2,9 +2,11 @@ package bot
 
 import (
 	"biliroaming-blacklist-server-go/utils"
+	"fmt"
 	"log"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/PaulSonOfLars/gotgbot/v2"
 	"github.com/PaulSonOfLars/gotgbot/v2/ext"
@@ -34,6 +36,12 @@ func (tg *TelegramBot) commandBan(b *gotgbot.Bot, ctx *ext.Context) error {
 		return err
 	}
 
+	accInfo, err := utils.GetBiliAccInfo(uid)
+	if err != nil {
+		_, err := ctx.EffectiveMessage.Reply(b, "获取用户信息失败", nil)
+		return err
+	}
+
 	banUntil, _ := utils.ParseDuration("3m")
 	if len(splits) > 2 {
 		banUntil, err = utils.ParseDuration(splits[2])
@@ -50,7 +58,17 @@ func (tg *TelegramBot) commandBan(b *gotgbot.Bot, ctx *ext.Context) error {
 		return err
 	}
 
-	_, err = ctx.EffectiveMessage.Reply(b, "已封禁", nil)
+	location, _ := time.LoadLocation("Asia/Shanghai")
+	text := fmt.Sprintf("*已封禁*\nUID: `%d`\n昵称: [%s](https://space.bilibili.com/%d)\n将在 `%s` 后解除",
+		accInfo.Mid,
+		accInfo.Name,
+		accInfo.Mid,
+		banUntil.In(location).Format(TIME_FORMAT),
+	)
+
+	_, err = ctx.EffectiveMessage.Reply(b, text, &gotgbot.SendMessageOpts{
+		ParseMode: "MarkdownV2",
+	})
 	return err
 }
 
