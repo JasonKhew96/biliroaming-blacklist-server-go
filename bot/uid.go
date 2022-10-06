@@ -66,7 +66,7 @@ func (tg *TelegramBot) genUidResp(uid int64, isMarkdown bool) (string, *gotgbot.
 				uid,
 			)
 		}
-		return text, genUidInlineKeyboard(user.UID, false), nil
+		return text, genUidInlineKeyboard(uid, false), nil
 	} else if err != nil {
 		tg.sugar.Errorf("failed to get bilibili user: %v", err)
 		return "", nil, err
