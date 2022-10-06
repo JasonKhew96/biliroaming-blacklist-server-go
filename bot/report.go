@@ -5,7 +5,6 @@ import (
 	"biliroaming-blacklist-server-go/utils"
 	"database/sql"
 	"fmt"
-	"log"
 	"strconv"
 	"strings"
 
@@ -64,6 +63,7 @@ func (tg *TelegramBot) commandReport(b *gotgbot.Bot, ctx *ext.Context) error {
 
 	accInfo, err := utils.GetBiliAccInfo(uid)
 	if err != nil {
+		tg.sugar.Errorf("failed to get acc info: %v", err)
 		_, err := ctx.EffectiveMessage.Reply(b, fmt.Sprintf("获取用户信息失败: %s", err.Error()), nil)
 		return err
 	}
@@ -116,7 +116,7 @@ func (tg *TelegramBot) commandReport(b *gotgbot.Bot, ctx *ext.Context) error {
 
 	reportId, err := tg.db.InsertReport(uid, description, fileType, fileId)
 	if err != nil {
-		log.Println(err)
+		tg.sugar.Errorf("failed to insert report: %v", err)
 		_, err := ctx.EffectiveMessage.Reply(b, "数据库错误", nil)
 		return err
 	}
@@ -169,7 +169,6 @@ func (tg *TelegramBot) callbackReportResp(b *gotgbot.Bot, ctx *ext.Context) erro
 		uidStr := strings.TrimPrefix(callbackData, "report_record_")
 		uid, err := strconv.ParseInt(uidStr, 10, 64)
 		if err != nil {
-			log.Println(err)
 			_, err := ctx.CallbackQuery.Answer(b, &gotgbot.AnswerCallbackQueryOpts{
 				Text: "参数错误",
 			})
@@ -182,7 +181,7 @@ func (tg *TelegramBot) callbackReportResp(b *gotgbot.Bot, ctx *ext.Context) erro
 			})
 			return err
 		} else if err != nil {
-			log.Println(err)
+			tg.sugar.Errorf("failed to gen uid resp: %v", err)
 			_, err := ctx.CallbackQuery.Answer(b, &gotgbot.AnswerCallbackQueryOpts{
 				Text: "数据库错误",
 			})
@@ -197,7 +196,6 @@ func (tg *TelegramBot) callbackReportResp(b *gotgbot.Bot, ctx *ext.Context) erro
 		reportIdStr := strings.TrimPrefix(callbackData, "report_confirm_")
 		reportId, err := strconv.Atoi(reportIdStr)
 		if err != nil {
-			log.Println(err)
 			_, err := ctx.CallbackQuery.Answer(b, &gotgbot.AnswerCallbackQueryOpts{
 				Text: "参数错误",
 			})
@@ -205,7 +203,7 @@ func (tg *TelegramBot) callbackReportResp(b *gotgbot.Bot, ctx *ext.Context) erro
 		}
 		report, err := tg.db.GetReport(reportId)
 		if err != nil {
-			log.Println(err)
+			tg.sugar.Errorf("failed to get report: %v", err)
 			_, err := ctx.CallbackQuery.Answer(b, &gotgbot.AnswerCallbackQueryOpts{
 				Text: "数据库错误",
 			})
@@ -214,7 +212,7 @@ func (tg *TelegramBot) callbackReportResp(b *gotgbot.Bot, ctx *ext.Context) erro
 
 		accInfo, err := utils.GetBiliAccInfo(report.UID)
 		if err != nil {
-			log.Println(err)
+			tg.sugar.Errorf("failed to get bili acc info: %v", err)
 			_, err := ctx.CallbackQuery.Answer(b, &gotgbot.AnswerCallbackQueryOpts{
 				Text: "B站API错误",
 			})
@@ -256,6 +254,7 @@ func (tg *TelegramBot) callbackReportResp(b *gotgbot.Bot, ctx *ext.Context) erro
 		}
 
 		if _, err = tg.db.InsertRecord(report.UID, report.Description, msg.Chat.Id, msg.MessageId); err != nil {
+			tg.sugar.Errorf("failed to insert record: %v", err)
 			return err
 		}
 

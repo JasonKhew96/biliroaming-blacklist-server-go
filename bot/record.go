@@ -2,7 +2,6 @@ package bot
 
 import (
 	"fmt"
-	"log"
 	"strconv"
 	"strings"
 
@@ -22,7 +21,7 @@ func (tg *TelegramBot) genRecordResp(uid int64, page int) (string, *gotgbot.Inli
 
 	record, err := tg.db.GetRecord(uid, page-1)
 	if err != nil {
-		log.Println(err)
+		tg.sugar.Errorf("GetRecord: %v", err)
 		return "", nil, err
 	}
 
@@ -93,7 +92,7 @@ func (tg *TelegramBot) commandRecord(b *gotgbot.Bot, ctx *ext.Context) error {
 
 	text, replyMarkup, err := tg.genRecordResp(uid, 1)
 	if err != nil {
-		log.Println(err)
+		tg.sugar.Errorf("failed to generate record response: %v", err)
 		_, err := ctx.EffectiveMessage.Reply(b, "查询失败", nil)
 		return err
 	}
@@ -138,7 +137,7 @@ func (tg *TelegramBot) callbackRecordResp(b *gotgbot.Bot, ctx *ext.Context) erro
 		}
 		text, replyMarkup, err := tg.genRecordResp(uid, page)
 		if err != nil {
-			log.Println(err)
+			tg.sugar.Errorf("failed to generate record response: %v", err)
 			_, err = ctx.CallbackQuery.Answer(b, &gotgbot.AnswerCallbackQueryOpts{
 				Text: "查询错误",
 			})

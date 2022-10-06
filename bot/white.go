@@ -1,7 +1,6 @@
 package bot
 
 import (
-	"log"
 	"strconv"
 	"strings"
 
@@ -35,7 +34,7 @@ func (tg *TelegramBot) commandWhite(b *gotgbot.Bot, ctx *ext.Context) error {
 
 	err = tg.db.WhiteBiliUser(uid, true)
 	if err != nil {
-		log.Println("failed to ban user: ", err.Error())
+		tg.sugar.Errorf("failed to whitelist user: %v", err)
 		_, err := ctx.EffectiveMessage.Reply(b, "数据库错误", nil)
 		return err
 	}
@@ -69,7 +68,7 @@ func (tg *TelegramBot) commandUnwhite(b *gotgbot.Bot, ctx *ext.Context) error {
 
 	err = tg.db.WhiteBiliUser(uid, false)
 	if err != nil {
-		log.Println("failed to ban user: ", err.Error())
+		tg.sugar.Errorf("failed to unwhitelist user: %v", err)
 		_, err := ctx.EffectiveMessage.Reply(b, "数据库错误", nil)
 		return err
 	}

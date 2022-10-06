@@ -5,11 +5,11 @@ import (
 	"biliroaming-blacklist-server-go/config"
 	"biliroaming-blacklist-server-go/db"
 	"context"
-	"log"
 	"time"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/template/html"
+	"go.uber.org/zap"
 )
 
 const (
@@ -19,6 +19,8 @@ const (
 )
 
 type Web struct {
+	sugar *zap.SugaredLogger
+
 	app *fiber.App
 	db  *db.Database
 	ctx context.Context
@@ -33,7 +35,7 @@ func (w *Web) index(c *fiber.Ctx) error {
 	}, "layouts/main")
 }
 
-func New(db *db.Database, tg *bot.TelegramBot, conf config.CaptchasConfig) {
+func New(db *db.Database, tg *bot.TelegramBot, conf config.CaptchasConfig, sugar *zap.SugaredLogger) {
 	engine := html.New("./views", ".html")
 
 	app := fiber.New(fiber.Config{
@@ -44,6 +46,7 @@ func New(db *db.Database, tg *bot.TelegramBot, conf config.CaptchasConfig) {
 	})
 
 	web := Web{
+		sugar: sugar,
 		db:  db,
 		ctx: context.Background(),
 		app: app,
@@ -60,6 +63,6 @@ func New(db *db.Database, tg *bot.TelegramBot, conf config.CaptchasConfig) {
 	app.Post("/report", web.reportPost)
 
 	if err := app.Listen(":7181"); err != nil {
-		log.Fatal(err)
+		sugar.Fatalln(err)
 	}
 }

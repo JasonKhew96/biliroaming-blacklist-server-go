@@ -6,9 +6,17 @@ import (
 	"biliroaming-blacklist-server-go/db"
 	"biliroaming-blacklist-server-go/web"
 	"log"
+
+	"go.uber.org/zap"
 )
 
 func main() {
+	logger, err := zap.NewProduction()
+	if err != nil {
+		log.Fatal(err)
+	}
+	sugar := logger.Sugar()
+
 	config, err := config.LoadConfig()
 	if err != nil {
 		log.Fatal(err)
@@ -17,9 +25,9 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	tg, err := bot.New(db, config.TelegramConfig)
+	tg, err := bot.New(db, config.TelegramConfig, sugar)
 	if err != nil {
 		log.Fatal(err)
 	}
-	web.New(db, tg, config.CaptchasConfig)
+	web.New(db, tg, config.CaptchasConfig, sugar)
 }

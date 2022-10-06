@@ -3,7 +3,6 @@ package bot
 import (
 	"biliroaming-blacklist-server-go/models"
 	"database/sql"
-	"log"
 	"strconv"
 	"strings"
 	"time"
@@ -47,7 +46,7 @@ func (tg *TelegramBot) commandAddAdmin(b *gotgbot.Bot, ctx *ext.Context) error {
 
 	_, err = tg.db.GetAdmin(id)
 	if err != nil && err != sql.ErrNoRows {
-		log.Println("failed to get admin: ", err.Error())
+		tg.sugar.Errorf("failed to get admin: %s", err.Error())
 		_, err := ctx.EffectiveMessage.Reply(b, "数据库错误", nil)
 		return err
 	} else if err == nil {
@@ -61,7 +60,7 @@ func (tg *TelegramBot) commandAddAdmin(b *gotgbot.Bot, ctx *ext.Context) error {
 		ModifiedAt: time.Now(),
 	})
 	if err != nil {
-		log.Println("failed to insert admin: ", err.Error())
+		tg.sugar.Errorf("failed to upsert admin: %s", err.Error())
 		_, err := ctx.EffectiveMessage.Reply(b, "数据库错误", nil)
 		return err
 	}
@@ -94,7 +93,7 @@ func (tg *TelegramBot) commandRemoveAdmin(b *gotgbot.Bot, ctx *ext.Context) erro
 	}
 
 	if _, err = tg.db.RemoveAdmin(id); err != nil {
-		log.Println("failed to remove admin: ", err.Error())
+		tg.sugar.Errorf("failed to remove admin: %s", err.Error())
 		_, err := ctx.EffectiveMessage.Reply(b, "数据库错误", nil)
 		return err
 	}
@@ -137,7 +136,7 @@ func (tg *TelegramBot) commandAlterAdmin(b *gotgbot.Bot, ctx *ext.Context) error
 
 	admin, err := tg.db.GetAdmin(id)
 	if err != nil {
-		log.Println("failed to get admin: ", err.Error())
+		tg.sugar.Errorf("failed to get admin: %s", err.Error())
 		_, err := ctx.EffectiveMessage.Reply(b, "数据库错误", nil)
 		return err
 	}
@@ -147,7 +146,7 @@ func (tg *TelegramBot) commandAlterAdmin(b *gotgbot.Bot, ctx *ext.Context) error
 
 	err = tg.db.UpsertAdmin(admin)
 	if err != nil {
-		log.Println("failed to insert admin: ", err.Error())
+		tg.sugar.Errorf("failed to upsert admin: %s", err.Error())
 		_, err := ctx.EffectiveMessage.Reply(b, "数据库错误", nil)
 		return err
 	}

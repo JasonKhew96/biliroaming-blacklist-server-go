@@ -12,24 +12,28 @@ import (
 	"github.com/PaulSonOfLars/gotgbot/v2"
 	"github.com/PaulSonOfLars/gotgbot/v2/ext"
 	"github.com/PaulSonOfLars/gotgbot/v2/ext/handlers"
+	"go.uber.org/zap"
 )
 
 const TIME_FORMAT = "2006-01-02 15:04:05"
 
 type TelegramBot struct {
+	sugar         *zap.SugaredLogger
+	
 	db            *db.Database
 	Bot           *gotgbot.Bot
 	AnnouceChatId int64
 	ReportChatId  int64
 }
 
-func New(db *db.Database, config config.TelegramConfig) (*TelegramBot, error) {
+func New(db *db.Database, config config.TelegramConfig, sugar *zap.SugaredLogger) (*TelegramBot, error) {
 	bot, err := gotgbot.NewBot(config.BotToken, nil)
 	if err != nil {
 		return nil, err
 	}
 
 	tg := &TelegramBot{
+		sugar:         sugar,
 		db:            db,
 		Bot:           bot,
 		AnnouceChatId: config.AnnounceChatId,
@@ -40,7 +44,7 @@ func New(db *db.Database, config config.TelegramConfig) (*TelegramBot, error) {
 		ErrorLog: log.New(os.Stderr, "ERROR: ", log.LstdFlags),
 		DispatcherOpts: ext.DispatcherOpts{
 			Error: func(b *gotgbot.Bot, ctx *ext.Context, err error) ext.DispatcherAction {
-				log.Println("an error occurred while handling update: ", err.Error())
+				sugar.Errorln(err)
 				return ext.DispatcherActionNoop
 			},
 		},

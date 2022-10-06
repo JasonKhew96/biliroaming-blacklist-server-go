@@ -3,7 +3,6 @@ package bot
 import (
 	"database/sql"
 	"fmt"
-	"log"
 	"strconv"
 	"strings"
 	"time"
@@ -69,6 +68,7 @@ func (tg *TelegramBot) genUidResp(uid int64, isMarkdown bool) (string, *gotgbot.
 		}
 		return text, genUidInlineKeyboard(user.UID, false), nil
 	} else if err != nil {
+		tg.sugar.Errorf("failed to get bilibili user: %v", err)
 		return "", nil, err
 	}
 
@@ -148,6 +148,7 @@ func (tg *TelegramBot) commandUid(b *gotgbot.Bot, ctx *ext.Context) error {
 
 	text, replyMarkup, err := tg.genUidResp(uid, true)
 	if err != nil {
+		tg.sugar.Errorf("failed to generate uid response: %v", err)
 		_, err := ctx.EffectiveMessage.Reply(b, "查询失败", nil)
 		return err
 	}
@@ -184,7 +185,7 @@ func (tg *TelegramBot) callbackUidResp(b *gotgbot.Bot, ctx *ext.Context) error {
 		}
 		text, replyMarkup, err := tg.genRecordResp(uid, 1)
 		if err != nil {
-			log.Println(err)
+			tg.sugar.Errorf("failed to generate record response: %v", err)
 			_, err = ctx.CallbackQuery.Answer(b, &gotgbot.AnswerCallbackQueryOpts{
 				Text: "查询错误",
 			})
@@ -214,7 +215,7 @@ func (tg *TelegramBot) callbackUidResp(b *gotgbot.Bot, ctx *ext.Context) error {
 		}
 		banUntil := time.Now().AddDate(0, months, 0)
 		if err := tg.db.BanBiliUser(uid, banUntil); err != nil {
-			log.Println("failed to ban user: ", err.Error())
+			tg.sugar.Errorf("failed to ban bilibili user: %v", err)
 			_, err = ctx.CallbackQuery.Answer(b, &gotgbot.AnswerCallbackQueryOpts{
 				Text:      "封禁失败",
 				ShowAlert: true,
@@ -229,6 +230,7 @@ func (tg *TelegramBot) callbackUidResp(b *gotgbot.Bot, ctx *ext.Context) error {
 		}
 		text, replyMarkup, err := tg.genUidResp(uid, true)
 		if err != nil {
+			tg.sugar.Errorf("failed to generate uid response: %v", err)
 			_, err := ctx.CallbackQuery.Answer(b, &gotgbot.AnswerCallbackQueryOpts{
 				Text: "查询失败",
 			})
@@ -247,7 +249,7 @@ func (tg *TelegramBot) callbackUidResp(b *gotgbot.Bot, ctx *ext.Context) error {
 			return err
 		}
 		if err := tg.db.UnbanBiliUser(uid); err != nil {
-			log.Println("failed to unban user: ", err.Error())
+			tg.sugar.Errorf("failed to unban bilibili user: %v", err)
 			_, err = ctx.CallbackQuery.Answer(b, &gotgbot.AnswerCallbackQueryOpts{
 				Text:      "解封失败",
 				ShowAlert: true,
@@ -262,6 +264,7 @@ func (tg *TelegramBot) callbackUidResp(b *gotgbot.Bot, ctx *ext.Context) error {
 		}
 		text, replyMarkup, err := tg.genUidResp(uid, true)
 		if err != nil {
+			tg.sugar.Errorf("failed to generate uid response: %v", err)
 			_, err := ctx.CallbackQuery.Answer(b, &gotgbot.AnswerCallbackQueryOpts{
 				Text: "查询失败",
 			})

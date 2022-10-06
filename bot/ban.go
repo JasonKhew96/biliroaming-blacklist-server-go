@@ -3,7 +3,6 @@ package bot
 import (
 	"biliroaming-blacklist-server-go/utils"
 	"fmt"
-	"log"
 	"strconv"
 	"strings"
 	"time"
@@ -38,6 +37,7 @@ func (tg *TelegramBot) commandBan(b *gotgbot.Bot, ctx *ext.Context) error {
 
 	accInfo, err := utils.GetBiliAccInfo(uid)
 	if err != nil {
+		tg.sugar.Errorf("failed to get acc info: %v", err)
 		_, err := ctx.EffectiveMessage.Reply(b, "获取用户信息失败", nil)
 		return err
 	}
@@ -53,7 +53,7 @@ func (tg *TelegramBot) commandBan(b *gotgbot.Bot, ctx *ext.Context) error {
 
 	err = tg.db.BanBiliUser(uid, *banUntil)
 	if err != nil {
-		log.Println("failed to ban user: ", err.Error())
+		tg.sugar.Errorf("failed to ban user: %v", err)
 		_, err := ctx.EffectiveMessage.Reply(b, "数据库错误", nil)
 		return err
 	}
@@ -98,7 +98,7 @@ func (tg *TelegramBot) commandUnban(b *gotgbot.Bot, ctx *ext.Context) error {
 
 	err = tg.db.UnbanBiliUser(uid)
 	if err != nil {
-		log.Println("failed to ban user: ", err.Error())
+		tg.sugar.Errorf("failed to unban user: %v", err)
 		_, err := ctx.EffectiveMessage.Reply(b, "数据库错误", nil)
 		return err
 	}

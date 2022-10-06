@@ -2,7 +2,6 @@ package bot
 
 import (
 	"fmt"
-	"log"
 
 	"github.com/PaulSonOfLars/gotgbot/v2"
 	"github.com/PaulSonOfLars/gotgbot/v2/ext"
@@ -21,21 +20,21 @@ func (tg *TelegramBot) commandStats(b *gotgbot.Bot, ctx *ext.Context) error {
 
 	totalUser, err := tg.db.GetTotalUser()
 	if err != nil {
-		log.Println("failed to get total user: ", err.Error())
+		tg.sugar.Errorf("failed to get total user: %v", err)
 		_, err := ctx.EffectiveMessage.Reply(b, "数据库错误", nil)
 		return err
 	}
 
 	totalRecord, err := tg.db.GetTotalRecord()
 	if err != nil {
-		log.Println("failed to get total record: ", err.Error())
+		tg.sugar.Errorf("failed to get total record: %v", err)
 		_, err := ctx.EffectiveMessage.Reply(b, "数据库错误", nil)
 		return err
 	}
 
 	totalReport, err := tg.db.GetTotalReport()
 	if err != nil {
-		log.Println("failed to get total report: ", err.Error())
+		tg.sugar.Errorf("failed to get total report: %v", err)
 		_, err := ctx.EffectiveMessage.Reply(b, "数据库错误", nil)
 		return err
 	}
