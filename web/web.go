@@ -5,8 +5,10 @@ import (
 	"biliroaming-blacklist-server-go/db"
 	"context"
 	"log"
+	"strings"
 
 	"github.com/gofiber/fiber/v2"
+	"github.com/gofiber/fiber/v2/middleware/csrf"
 	"github.com/gofiber/template/html"
 )
 
@@ -35,6 +37,14 @@ func New(db *db.Database, tg *bot.TelegramBot) {
 	app := fiber.New(fiber.Config{
 		Views: engine,
 	})
+
+	app.Use(csrf.New(
+		csrf.Config{
+			Next: func(c *fiber.Ctx) bool {
+				return strings.HasPrefix(c.Path(), "/api/") || strings.HasPrefix(c.Path(), "/status.php")
+			},
+		},
+	))
 
 	web := Web{
 		db:  db,
