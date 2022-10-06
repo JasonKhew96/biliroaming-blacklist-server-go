@@ -51,7 +51,7 @@ func genUidInlineKeyboard(uid int64, isBlacklist bool) *gotgbot.InlineKeyboardMa
 	return &gotgbot.InlineKeyboardMarkup{InlineKeyboard: inlineKeyboard}
 }
 
-func (tg *TelegramBot) genUidResp(uid int64, isMarkdown bool) (string, *gotgbot.InlineKeyboardMarkup, error) {
+func (tg *TelegramBot) genUidResp(uid int64, isMarkdown bool, isAdmin bool) (string, *gotgbot.InlineKeyboardMarkup, error) {
 	user, err := tg.db.GetBiliUser(uid)
 	if err == sql.ErrNoRows {
 		var text string
@@ -83,26 +83,34 @@ func (tg *TelegramBot) genUidResp(uid int64, isMarkdown bool) (string, *gotgbot.
 
 	var text string
 	if isMarkdown {
-		text = fmt.Sprintf(
-			"uid: `%d`\n请求次数: `%d`\n最后请求时间: `%s`\n",
-			user.UID,
-			user.Counter,
-			EscapeMarkdownV2(user.ModifiedAt.In(location).Format(TIME_FORMAT)),
-		)
+		text = fmt.Sprintf("uid: `%d`\n", uid)
+		if isAdmin {
+			if user.Counter > 0 {
+				text += fmt.Sprintf(
+					"请求次数: `%d`\n最后请求时间: `%s`",
+					user.Counter,
+					EscapeMarkdownV2(user.ModifiedAt.In(location).Format(TIME_FORMAT)),
+				)
+			}
+		}
 	} else {
-		text = fmt.Sprintf(
-			"uid: %d\n请求次数: %d\n最后请求时间: %s\n",
-			user.UID,
-			user.Counter,
-			EscapeMarkdownV2(user.ModifiedAt.In(location).Format(TIME_FORMAT)),
-		)
+		text = fmt.Sprintf("uid: %d\n", uid)
+		if isAdmin {
+			if user.Counter > 0 {
+				text += fmt.Sprintf(
+					"请求次数: %d\n最后请求时间: %s",
+					user.Counter,
+					EscapeMarkdownV2(user.ModifiedAt.In(location).Format(TIME_FORMAT)),
+				)
+			}
+		}
 	}
 
 	if user.IsWhitelist {
 		if isMarkdown {
 			text += "该用户是*白名单*用户\n"
 		} else {
-			text += "该用户是白名单用户\n"
+			text += "该用户是 白名单 用户\n"
 		}
 	}
 
@@ -114,7 +122,10 @@ func (tg *TelegramBot) genUidResp(uid int64, isMarkdown bool) (string, *gotgbot.
 		}
 	}
 
-	replyMarkup := genUidInlineKeyboard(user.UID, isBlacklisted)
+	var replyMarkup *gotgbot.InlineKeyboardMarkup
+	if isAdmin {
+		replyMarkup = genUidInlineKeyboard(user.UID, isBlacklisted)
+	}
 
 	return text, replyMarkup, nil
 }
@@ -128,10 +139,8 @@ func (tg *TelegramBot) commandUid(b *gotgbot.Bot, ctx *ext.Context) error {
 	if !ctx.EffectiveSender.IsUser() {
 		return nil
 	}
-	if !IsLevelAdmin(tg.GetUserAdminLevel(ctx.EffectiveSender.Id())) {
-		_, err := ctx.EffectiveMessage.Reply(b, "权限不足", nil)
-		return err
-	}
+
+	isAdmin := IsLevelAdmin(tg.GetUserAdminLevel(ctx.EffectiveSender.Id()))
 
 	splits := strings.Split(msg.Text, " ")
 	if len(splits) <= 1 {
@@ -146,7 +155,7 @@ func (tg *TelegramBot) commandUid(b *gotgbot.Bot, ctx *ext.Context) error {
 		return err
 	}
 
-	text, replyMarkup, err := tg.genUidResp(uid, true)
+	text, replyMarkup, err := tg.genUidResp(uid, true, isAdmin)
 	if err != nil {
 		tg.sugar.Errorf("failed to generate uid response: %v", err)
 		_, err := ctx.EffectiveMessage.Reply(b, "查询失败", nil)
@@ -228,7 +237,7 @@ func (tg *TelegramBot) callbackUidResp(b *gotgbot.Bot, ctx *ext.Context) error {
 		if err != nil {
 			return err
 		}
-		text, replyMarkup, err := tg.genUidResp(uid, true)
+		text, replyMarkup, err := tg.genUidResp(uid, true, true)
 		if err != nil {
 			tg.sugar.Errorf("failed to generate uid response: %v", err)
 			_, err := ctx.CallbackQuery.Answer(b, &gotgbot.AnswerCallbackQueryOpts{
@@ -262,7 +271,7 @@ func (tg *TelegramBot) callbackUidResp(b *gotgbot.Bot, ctx *ext.Context) error {
 		if err != nil {
 			return err
 		}
-		text, replyMarkup, err := tg.genUidResp(uid, true)
+		text, replyMarkup, err := tg.genUidResp(uid, true, true)
 		if err != nil {
 			tg.sugar.Errorf("failed to generate uid response: %v", err)
 			_, err := ctx.CallbackQuery.Answer(b, &gotgbot.AnswerCallbackQueryOpts{
@@ -278,4 +287,44 @@ func (tg *TelegramBot) callbackUidResp(b *gotgbot.Bot, ctx *ext.Context) error {
 		return err
 	}
 	return nil
+}
+
+func (tg *TelegramBot) inlineQuery(iq *gotgbot.InlineQuery) bool {
+	if iq.Query == "" {
+		return false
+	}
+	if _, err := strconv.ParseInt(iq.Query, 10, 64); err != nil {
+		return false
+	}
+	return true
+}
+
+func (tg *TelegramBot) inlineQueryResp(b *gotgbot.Bot, ctx *ext.Context) error {
+	uidStr := ctx.InlineQuery.Query
+	uid, err := strconv.ParseInt(uidStr, 10, 64)
+	if err != nil {
+		return err
+	}
+
+	isAdmin := IsLevelAdmin(tg.GetUserAdminLevel(ctx.EffectiveSender.Id()))
+
+	text, _, err := tg.genUidResp(uid, true, isAdmin)
+	if err != nil {
+		tg.sugar.Errorf("failed to generate uid response: %v", err)
+		return nil
+	}
+
+	inputMessageText := &gotgbot.InputTextMessageContent{
+		MessageText:           text,
+		ParseMode:             "MarkdownV2",
+		DisableWebPagePreview: true,
+	}
+	inlineQueryResultArticle := gotgbot.InlineQueryResultArticle{
+		Id:                  "uid_" + uidStr,
+		Title:               "UID: " + uidStr,
+		InputMessageContent: inputMessageText,
+	}
+
+	_, err = b.AnswerInlineQuery(ctx.InlineQuery.Id, []gotgbot.InlineQueryResult{inlineQueryResultArticle}, nil)
+	return err
 }

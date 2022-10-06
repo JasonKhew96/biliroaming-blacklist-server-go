@@ -174,7 +174,7 @@ func (tg *TelegramBot) callbackReportResp(b *gotgbot.Bot, ctx *ext.Context) erro
 			})
 			return err
 		}
-		text, _, err := tg.genUidResp(uid, false)
+		text, _, err := tg.genUidResp(uid, false, true)
 		if err == sql.ErrNoRows {
 			_, err := ctx.CallbackQuery.Answer(b, &gotgbot.AnswerCallbackQueryOpts{
 				Text: "未找到记录",

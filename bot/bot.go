@@ -18,8 +18,8 @@ import (
 const TIME_FORMAT = "2006-01-02 15:04:05"
 
 type TelegramBot struct {
-	sugar         *zap.SugaredLogger
-	
+	sugar *zap.SugaredLogger
+
 	db            *db.Database
 	Bot           *gotgbot.Bot
 	AnnouceChatId int64
@@ -85,20 +85,7 @@ func New(db *db.Database, config config.TelegramConfig, sugar *zap.SugaredLogger
 		return err
 	}))
 
-	// dispatcher.AddHandler(
-	// 	handlers.NewInlineQuery(
-	// 		func(iq *gotgbot.InlineQuery) bool {
-	// 			if _, err := strconv.ParseInt(iq.Query, 10, 64); err != nil {
-	// 				return false
-	// 			}
-	// 			return true
-	// 		},
-	// 		func(b *gotgbot.Bot, ctx *ext.Context) error {
-	// 			// b.AnswerInlineQuery(ctx.InlineQuery.Id, nil)
-	// 			return nil
-	// 		},
-	// 	),
-	// )
+	dispatcher.AddHandler(handlers.NewInlineQuery(tg.inlineQuery, tg.inlineQueryResp))
 
 	err = updater.StartPolling(bot, &ext.PollingOpts{
 		DropPendingUpdates: true,
@@ -107,6 +94,7 @@ func New(db *db.Database, config config.TelegramConfig, sugar *zap.SugaredLogger
 			RequestOpts: &gotgbot.RequestOpts{
 				Timeout: time.Second * 60,
 			},
+			AllowedUpdates: []string{"message", "callback_query", "inline_query"},
 		},
 	})
 	if err != nil {
