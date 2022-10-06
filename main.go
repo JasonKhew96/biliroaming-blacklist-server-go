@@ -21,5 +21,5 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	web.New(db, tg)
+	web.New(db, tg, config.CaptchasConfig)
 }

@@ -20,9 +20,15 @@ type TelegramConfig struct {
 	ReportChatId   int64  `yaml:"report_chat_id"`
 }
 
+type CaptchasConfig struct {
+	SiteKey   string `yaml:"site_key"`
+	SecretKey string `yaml:"secret_key"`
+}
+
 type Config struct {
 	DatabaseConfig `yaml:"database"`
 	TelegramConfig `yaml:"telegram"`
+	CaptchasConfig `yaml:"captchas"`
 }
 
 func LoadConfig() (*Config, error) {

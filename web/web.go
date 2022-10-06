@@ -2,9 +2,11 @@ package web
 
 import (
 	"biliroaming-blacklist-server-go/bot"
+	"biliroaming-blacklist-server-go/config"
 	"biliroaming-blacklist-server-go/db"
 	"context"
 	"log"
+	"time"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/template/html"
@@ -21,6 +23,8 @@ type Web struct {
 	db  *db.Database
 	ctx context.Context
 	tg  *bot.TelegramBot
+
+	config config.CaptchasConfig
 }
 
 func (w *Web) index(c *fiber.Ctx) error {
@@ -29,11 +33,14 @@ func (w *Web) index(c *fiber.Ctx) error {
 	}, "layouts/main")
 }
 
-func New(db *db.Database, tg *bot.TelegramBot) {
+func New(db *db.Database, tg *bot.TelegramBot, conf config.CaptchasConfig) {
 	engine := html.New("./views", ".html")
 
 	app := fiber.New(fiber.Config{
 		Views: engine,
+		ReadTimeout: 60 * time.Second,
+		WriteTimeout: 60 * time.Second,
+		IdleTimeout: 60 * time.Second,
 	})
 
 	web := Web{
@@ -41,6 +48,7 @@ func New(db *db.Database, tg *bot.TelegramBot) {
 		ctx: context.Background(),
 		app: app,
 		tg:  tg,
+		config: conf,
 	}
 
 	app.Get("/", web.index)

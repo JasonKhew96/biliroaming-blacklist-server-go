@@ -22,9 +22,11 @@ import (
 )
 
 func (w *Web) reportGet(c *fiber.Ctx) error {
-	return c.Render("report", fiber.Map{
-		"Title": "自助举报",
-	}, "layouts/main")
+	fiberMap := fiber.Map{
+		"Title":   "自助举报",
+		"SiteKey": w.config.SiteKey,
+	}
+	return c.Render("report", fiberMap, "layouts/main")
 }
 
 func isUploadFileSupported(contentType string) bool {
@@ -36,7 +38,8 @@ func isUploadFileSupported(contentType string) bool {
 
 func (w *Web) reportPost(c *fiber.Ctx) error {
 	fiberMap := fiber.Map{
-		"Title": "自助举报",
+		"Title":   "自助举报",
+		"SiteKey": w.config.SiteKey,
 	}
 	fileHeader, err := c.FormFile("file")
 	if err != nil {
@@ -71,6 +74,18 @@ func (w *Web) reportPost(c *fiber.Ctx) error {
 	uid, err := strconv.ParseInt(uidStr, 10, 64)
 	if err != nil || uid <= 0 {
 		fiberMap["Message"] = "UID 格式错误"
+		return c.Render("report", fiberMap, "layouts/main")
+	}
+
+	token := utils.CopyString(c.FormValue("cf-turnstile-response"))
+	ip := string(utils.CopyBytes(c.Request().Header.Peek("CF-Connecting-IP")))
+	if len(token) == 0 || len(ip) == 0 {
+		fiberMap["Message"] = "请完成验证"
+		return c.Render("report", fiberMap, "layouts/main")
+	}
+	success, err := w.verifyCaptchas(token, ip)
+	if err != nil || !success {
+		fiberMap["Message"] = "验证失败"
 		return c.Render("report", fiberMap, "layouts/main")
 	}
 

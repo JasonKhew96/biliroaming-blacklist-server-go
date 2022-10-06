@@ -3,44 +3,71 @@
 <h1>{{.Title}}</h1>
 
 {{ if .Message }}
-<div class="alert alert-primary" role="alert">
-    {{ .Message }}
-</div>
+<div class="alert alert-primary" role="alert">{{ .Message }}</div>
 {{ end }}
 
 <form action="/report" method="post" enctype="multipart/form-data">
-    <p>
-        <label for="file">截图证据: </label>
-        <input type="file" id="file" name="file" accept="image/jpeg,image/png,video/mp4" required>
-    </p>
-    <p>
-        <label for="uid">UID: </label>
-        <input type="text" id="inputUid" name="uid" placeholder="208259" pattern="\d+" required>
-    </p>
-    <p>
-        <label for="description">描述: </label>
-        <textarea id="description" name="description" placeholder="描述" required></textarea>
-    </p>
-    <p>
-        <input type="submit" value="Submit">
-    </p>
+  <p>
+    <label for="file">截图证据: </label>
+    <br>
+    <input
+      type="file"
+      id="file"
+      name="file"
+      accept="image/jpeg,image/png,video/mp4"
+      required
+    />
+  </p>
+  <p>
+    <label for="uid">UID: </label>
+    <br>
+    <input
+      type="text"
+      id="inputUid"
+      name="uid"
+      placeholder="208259"
+      pattern="\d+"
+      required
+    />
+  </p>
+  <p>
+    <label for="description">描述: </label>
+    <br>
+    <textarea
+      id="description"
+      name="description"
+      placeholder="描述"
+      required
+    ></textarea>
+  </p>
+  <p>
+    <div class="cf-turnstile" data-sitekey="{{ .SiteKey }}"></div>
+  </p>
+  <p>
+    <input type="submit" value="Submit" />
+  </p>
 </form>
 
 <script>
-    const inputUid = document.querySelector('#inputUid');
+  const inputUid = document.querySelector("#inputUid");
 
-    inputUid.addEventListener('input', () => {
-        inputUid.setCustomValidity('');
-        inputUid.checkValidity();
-    });
+  inputUid.addEventListener("input", () => {
+    inputUid.setCustomValidity("");
+    inputUid.checkValidity();
+  });
 
-    inputUid.addEventListener('invalid', () => {
-        if (inputUid.value === '') {
-            inputUid.setCustomValidity('请输入用户 UID');
-        } else {
-            inputUid.setCustomValidity('格式错误');
-        }
-    });
+  inputUid.addEventListener("invalid", () => {
+    if (inputUid.value === "") {
+      inputUid.setCustomValidity("请输入用户 UID");
+    } else {
+      inputUid.setCustomValidity("格式错误");
+    }
+  });
 </script>
+<script
+  src="https://challenges.cloudflare.com/turnstile/v0/api.js"
+  async
+  defer
+></script>
 
 {{template "partials/footer" .}}
