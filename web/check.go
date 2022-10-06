@@ -11,7 +11,7 @@ import (
 
 func (w *Web) checkGet(c *fiber.Ctx) error {
 	return c.Render("check_get", fiber.Map{
-		"Title":   "自助查询",
+		"Title":   "查询",
 		"SiteKey": w.config.SiteKey,
 	}, "layouts/main")
 }
@@ -23,7 +23,7 @@ type RecordResult struct {
 
 func (w *Web) checkPost(c *fiber.Ctx) error {
 	fiberMap := fiber.Map{
-		"Title":   "自助查询",
+		"Title":   "查询",
 	}
 	uidStr := utils.CopyString(c.FormValue("uid"))
 	uid, err := strconv.ParseInt(uidStr, 10, 64)

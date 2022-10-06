@@ -23,7 +23,7 @@ import (
 
 func (w *Web) reportGet(c *fiber.Ctx) error {
 	fiberMap := fiber.Map{
-		"Title":   "自助举报",
+		"Title":   "举报",
 		"SiteKey": w.config.SiteKey,
 	}
 	return c.Render("report", fiberMap, "layouts/main")
@@ -38,7 +38,7 @@ func isUploadFileSupported(contentType string) bool {
 
 func (w *Web) reportPost(c *fiber.Ctx) error {
 	fiberMap := fiber.Map{
-		"Title":   "自助举报",
+		"Title":   "举报",
 		"SiteKey": w.config.SiteKey,
 	}
 	fileHeader, err := c.FormFile("file")
