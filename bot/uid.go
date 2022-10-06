@@ -87,7 +87,7 @@ func (tg *TelegramBot) genUidResp(uid int64, isMarkdown bool, isAdmin bool) (str
 		if isAdmin {
 			if user.Counter > 0 {
 				text += fmt.Sprintf(
-					"请求次数: `%d`\n最后请求时间: `%s`",
+					"请求次数: `%d`\n最后请求时间: `%s`\n",
 					user.Counter,
 					EscapeMarkdownV2(user.ModifiedAt.In(location).Format(TIME_FORMAT)),
 				)
@@ -98,7 +98,7 @@ func (tg *TelegramBot) genUidResp(uid int64, isMarkdown bool, isAdmin bool) (str
 		if isAdmin {
 			if user.Counter > 0 {
 				text += fmt.Sprintf(
-					"请求次数: %d\n最后请求时间: %s",
+					"请求次数: %d\n最后请求时间: %s\n",
 					user.Counter,
 					EscapeMarkdownV2(user.ModifiedAt.In(location).Format(TIME_FORMAT)),
 				)
@@ -162,11 +162,16 @@ func (tg *TelegramBot) commandUid(b *gotgbot.Bot, ctx *ext.Context) error {
 		return err
 	}
 
-	if _, err = ctx.EffectiveMessage.Reply(b, text, &gotgbot.SendMessageOpts{
+	sendMessageOpts := &gotgbot.SendMessageOpts{
 		DisableWebPagePreview: true,
 		ParseMode:             "MarkdownV2",
-		ReplyMarkup:           replyMarkup,
-	}); err != nil {
+	}
+
+	if isAdmin {
+		sendMessageOpts.ReplyMarkup = replyMarkup
+	}
+
+	if _, err = ctx.EffectiveMessage.Reply(b, text, sendMessageOpts); err != nil {
 		return err
 	}
 
