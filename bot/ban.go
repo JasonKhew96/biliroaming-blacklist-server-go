@@ -104,6 +104,13 @@ func (tg *TelegramBot) commandUnban(b *gotgbot.Bot, ctx *ext.Context) error {
 		return err
 	}
 
+	accInfo, err := utils.GetBiliAccInfo(uid)
+	if err != nil {
+		tg.sugar.Errorf("failed to get acc info: %v", err)
+		_, err := ctx.EffectiveMessage.Reply(b, "获取用户信息失败", nil)
+		return err
+	}
+
 	err = tg.db.UnbanBiliUser(uid)
 	if err != nil {
 		tg.sugar.Errorf("failed to unban user: %v", err)
@@ -111,6 +118,14 @@ func (tg *TelegramBot) commandUnban(b *gotgbot.Bot, ctx *ext.Context) error {
 		return err
 	}
 
-	_, err = ctx.EffectiveMessage.Reply(b, "已解除封禁", nil)
+	text := fmt.Sprintf("*已解除封禁*\nUID: `%d`\n昵称: [%s](https://space.bilibili.com/%d)\n",
+		accInfo.Mid,
+		accInfo.Name,
+		accInfo.Mid,
+	)
+
+	_, err = ctx.EffectiveMessage.Reply(b, text, &gotgbot.SendMessageOpts{
+		ParseMode: "MarkdownV2",
+	})
 	return err
 }
