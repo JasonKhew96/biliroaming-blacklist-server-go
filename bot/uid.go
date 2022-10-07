@@ -11,7 +11,7 @@ import (
 	"github.com/PaulSonOfLars/gotgbot/v2/ext"
 )
 
-func genUidInlineKeyboard(uid int64, isBlacklist bool) *gotgbot.InlineKeyboardMarkup {
+func genUidInlineKeyboard(uid int64, isBlacklist, isAdmin bool) *gotgbot.InlineKeyboardMarkup {
 	inlineKeyboard := [][]gotgbot.InlineKeyboardButton{}
 	inlineKeyboard01 := []gotgbot.InlineKeyboardButton{
 		{
@@ -19,13 +19,14 @@ func genUidInlineKeyboard(uid int64, isBlacklist bool) *gotgbot.InlineKeyboardMa
 			CallbackData: fmt.Sprintf("uid_record_%d", uid),
 		},
 	}
-	if isBlacklist {
+	if isBlacklist && isAdmin {
 		inlineKeyboard01 = append(inlineKeyboard01, gotgbot.InlineKeyboardButton{
 			Text:         "解除黑名单",
 			CallbackData: fmt.Sprintf("uid_unban_%d", uid),
 		})
-		inlineKeyboard = append(inlineKeyboard, inlineKeyboard01)
-	} else {
+	}
+	inlineKeyboard = append(inlineKeyboard, inlineKeyboard01)
+	if !isBlacklist && isAdmin {
 		inlineKeyboard = append(inlineKeyboard, []gotgbot.InlineKeyboardButton{
 			{
 				Text:         "封禁 3 个月",
@@ -66,7 +67,7 @@ func (tg *TelegramBot) genUidResp(uid int64, isMarkdown bool, isAdmin bool) (str
 				uid,
 			)
 		}
-		return text, genUidInlineKeyboard(uid, false), nil
+		return text, genUidInlineKeyboard(uid, false, isAdmin), nil
 	} else if err != nil {
 		tg.sugar.Errorf("failed to get bilibili user: %v", err)
 		return "", nil, err
@@ -122,10 +123,11 @@ func (tg *TelegramBot) genUidResp(uid int64, isMarkdown bool, isAdmin bool) (str
 		}
 	}
 
-	var replyMarkup *gotgbot.InlineKeyboardMarkup
-	if isAdmin {
-		replyMarkup = genUidInlineKeyboard(user.UID, isBlacklisted)
+	if !user.IsWhitelist && !isBlacklisted {
+		text += "并未查找到任何记录\n"
 	}
+
+	replyMarkup := genUidInlineKeyboard(user.UID, isBlacklisted, isAdmin)
 
 	return text, replyMarkup, nil
 }
@@ -167,7 +169,7 @@ func (tg *TelegramBot) commandUid(b *gotgbot.Bot, ctx *ext.Context) error {
 		ParseMode:             "MarkdownV2",
 	}
 
-	if isAdmin {
+	if replyMarkup != nil {
 		sendMessageOpts.ReplyMarkup = replyMarkup
 	}
 
@@ -180,9 +182,6 @@ func (tg *TelegramBot) commandUid(b *gotgbot.Bot, ctx *ext.Context) error {
 
 func (tg *TelegramBot) callbackUid(cq *gotgbot.CallbackQuery) bool {
 	if !strings.HasPrefix(cq.Data, "uid_") {
-		return false
-	}
-	if !IsLevelAdmin(tg.GetUserAdminLevel(cq.From.Id)) {
 		return false
 	}
 	return true
@@ -215,6 +214,10 @@ func (tg *TelegramBot) callbackUidResp(b *gotgbot.Bot, ctx *ext.Context) error {
 		_, _, err = ctx.EffectiveMessage.EditText(b, text, editMessageTextOpts)
 		return err
 	case strings.HasPrefix(callbackData, "uid_ban_"):
+		if !IsLevelAdmin(tg.GetUserAdminLevel(ctx.CallbackQuery.From.Id)) {
+			return nil
+		}
+
 		data := strings.TrimPrefix(callbackData, "uid_ban_")
 		splits := strings.Split(data, "_")
 		uidStr := splits[0]
@@ -257,6 +260,10 @@ func (tg *TelegramBot) callbackUidResp(b *gotgbot.Bot, ctx *ext.Context) error {
 		})
 		return err
 	case strings.HasPrefix(callbackData, "uid_unban_"):
+		if !IsLevelAdmin(tg.GetUserAdminLevel(ctx.CallbackQuery.From.Id)) {
+			return nil
+		}
+
 		uidStr := strings.TrimPrefix(callbackData, "uid_unban_")
 		uid, err := strconv.ParseInt(uidStr, 10, 64)
 		if err != nil {
