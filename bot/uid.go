@@ -181,10 +181,7 @@ func (tg *TelegramBot) commandUid(b *gotgbot.Bot, ctx *ext.Context) error {
 }
 
 func (tg *TelegramBot) callbackUid(cq *gotgbot.CallbackQuery) bool {
-	if !strings.HasPrefix(cq.Data, "uid_") {
-		return false
-	}
-	return true
+	return strings.HasPrefix(cq.Data, "uid_")
 }
 
 func (tg *TelegramBot) callbackUidResp(b *gotgbot.Bot, ctx *ext.Context) error {
