@@ -16,7 +16,14 @@ func (tg *TelegramBot) genRecordResp(uid int64, page int) (string, *gotgbot.Inli
 	}
 
 	if recordCount == 0 {
-		return "未找到记录", nil, nil
+		return "未找到记录", &gotgbot.InlineKeyboardMarkup{InlineKeyboard: [][]gotgbot.InlineKeyboardButton{
+			{
+				{
+					Text:         "查询 UID",
+					CallbackData: fmt.Sprintf("record_uid_%d", uid),
+				},
+			},
+		}}, nil
 	}
 
 	record, err := tg.db.GetRecord(uid, page-1)
@@ -116,6 +123,31 @@ func (tg *TelegramBot) callbackRecord(cq *gotgbot.CallbackQuery) bool {
 func (tg *TelegramBot) callbackRecordResp(b *gotgbot.Bot, ctx *ext.Context) error {
 	callbackData := ctx.CallbackQuery.Data
 	switch {
+	case strings.HasPrefix(callbackData, "record_uid_"):
+		uidStr := strings.TrimPrefix(callbackData, "record_uid_")
+		uid, err := strconv.ParseInt(uidStr, 10, 64)
+		if err != nil {
+			_, err = ctx.CallbackQuery.Answer(b, &gotgbot.AnswerCallbackQueryOpts{
+				Text: "参数错误",
+			})
+			return err
+		}
+		isAdmin := IsLevelAdmin(tg.GetUserAdminLevel(ctx.CallbackQuery.From.Id))
+		text, replyMarkup, err := tg.genUidResp(uid, true, isAdmin)
+		if err != nil {
+			tg.sugar.Errorf("failed to generate uid response: %v", err)
+			_, err := ctx.EffectiveMessage.Reply(b, "查询失败", nil)
+			return err
+		}
+		editMessageTextOpts := &gotgbot.EditMessageTextOpts{
+			ParseMode:             "MarkdownV2",
+			DisableWebPagePreview: true,
+		}
+		if replyMarkup != nil {
+			editMessageTextOpts.ReplyMarkup = *replyMarkup
+		}
+		_, _, err = ctx.EffectiveMessage.EditText(b, text, editMessageTextOpts)
+		return err
 	case strings.HasPrefix(callbackData, "record_page_"):
 		data := strings.TrimPrefix(callbackData, "record_page_")
 		splits := strings.Split(data, "_")
