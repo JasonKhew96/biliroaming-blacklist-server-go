@@ -79,7 +79,7 @@ func (tg *TelegramBot) genRecordResp(uid int64, page int) (string, *gotgbot.Inli
 }
 
 func (tg *TelegramBot) commandRecord(b *gotgbot.Bot, ctx *ext.Context) error {
-	if ctx.EffectiveSender.IsUser() && ctx.EffectiveChat.Id == ctx.EffectiveSender.Id() {
+	if !ctx.EffectiveSender.IsUser() || ctx.EffectiveChat.Id != ctx.EffectiveSender.Id() {
 		return nil
 	}
 

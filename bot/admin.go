@@ -12,7 +12,7 @@ import (
 )
 
 func (tg *TelegramBot) commandAddAdmin(b *gotgbot.Bot, ctx *ext.Context) error {
-	if ctx.EffectiveSender.IsUser() && ctx.EffectiveChat.Id == ctx.EffectiveSender.Id() {
+	if !ctx.EffectiveSender.IsUser() || ctx.EffectiveChat.Id != ctx.EffectiveSender.Id() {
 		return nil
 	}
 
@@ -73,7 +73,7 @@ func (tg *TelegramBot) commandAddAdmin(b *gotgbot.Bot, ctx *ext.Context) error {
 }
 
 func (tg *TelegramBot) commandRemoveAdmin(b *gotgbot.Bot, ctx *ext.Context) error {
-	if ctx.EffectiveSender.IsUser() && ctx.EffectiveChat.Id == ctx.EffectiveSender.Id() {
+	if !ctx.EffectiveSender.IsUser() || ctx.EffectiveChat.Id != ctx.EffectiveSender.Id() {
 		return nil
 	}
 
@@ -110,7 +110,7 @@ func (tg *TelegramBot) commandRemoveAdmin(b *gotgbot.Bot, ctx *ext.Context) erro
 }
 
 func (tg *TelegramBot) commandAlterAdmin(b *gotgbot.Bot, ctx *ext.Context) error {
-	if ctx.EffectiveSender.IsUser() && ctx.EffectiveChat.Id == ctx.EffectiveSender.Id() {
+	if !ctx.EffectiveSender.IsUser() || ctx.EffectiveChat.Id != ctx.EffectiveSender.Id() {
 		return nil
 	}
 

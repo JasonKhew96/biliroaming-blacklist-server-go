@@ -133,7 +133,7 @@ func (tg *TelegramBot) genUidResp(uid int64, isMarkdown bool, isAdmin bool) (str
 }
 
 func (tg *TelegramBot) commandUid(b *gotgbot.Bot, ctx *ext.Context) error {
-	if ctx.EffectiveSender.IsUser() && ctx.EffectiveChat.Id == ctx.EffectiveSender.Id() {
+	if !ctx.EffectiveSender.IsUser() || ctx.EffectiveChat.Id != ctx.EffectiveSender.Id() {
 		return nil
 	}
 

@@ -9,7 +9,7 @@ import (
 )
 
 func (tg *TelegramBot) commandWhite(b *gotgbot.Bot, ctx *ext.Context) error {
-	if ctx.EffectiveSender.IsUser() && ctx.EffectiveChat.Id == ctx.EffectiveSender.Id() {
+	if !ctx.EffectiveSender.IsUser() || ctx.EffectiveChat.Id != ctx.EffectiveSender.Id() {
 		return nil
 	}
 
@@ -47,7 +47,7 @@ func (tg *TelegramBot) commandWhite(b *gotgbot.Bot, ctx *ext.Context) error {
 }
 
 func (tg *TelegramBot) commandUnwhite(b *gotgbot.Bot, ctx *ext.Context) error {
-	if ctx.EffectiveSender.IsUser() && ctx.EffectiveChat.Id == ctx.EffectiveSender.Id() {
+	if !ctx.EffectiveSender.IsUser() || ctx.EffectiveChat.Id != ctx.EffectiveSender.Id() {
 		return nil
 	}
 
