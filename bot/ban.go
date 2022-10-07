@@ -12,6 +12,10 @@ import (
 )
 
 func (tg *TelegramBot) commandBan(b *gotgbot.Bot, ctx *ext.Context) error {
+	if ctx.EffectiveSender.IsUser() && ctx.EffectiveChat.Id == ctx.EffectiveSender.Id() {
+		return nil
+	}
+
 	msg := ctx.EffectiveMessage
 	if msg.Text == "" {
 		return nil
@@ -73,6 +77,10 @@ func (tg *TelegramBot) commandBan(b *gotgbot.Bot, ctx *ext.Context) error {
 }
 
 func (tg *TelegramBot) commandUnban(b *gotgbot.Bot, ctx *ext.Context) error {
+	if ctx.EffectiveSender.IsUser() && ctx.EffectiveChat.Id == ctx.EffectiveSender.Id() {
+		return nil
+	}
+
 	msg := ctx.EffectiveMessage
 	if msg.Text == "" {
 		return nil

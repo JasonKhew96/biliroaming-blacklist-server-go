@@ -12,6 +12,10 @@ import (
 )
 
 func (tg *TelegramBot) commandAddAdmin(b *gotgbot.Bot, ctx *ext.Context) error {
+	if ctx.EffectiveSender.IsUser() && ctx.EffectiveChat.Id == ctx.EffectiveSender.Id() {
+		return nil
+	}
+
 	msg := ctx.EffectiveMessage
 	if msg.Text == "" {
 		return nil
@@ -55,8 +59,8 @@ func (tg *TelegramBot) commandAddAdmin(b *gotgbot.Bot, ctx *ext.Context) error {
 	}
 
 	err = tg.db.UpsertAdmin(&models.Admin{
-		ID:    id,
-		Level: int16(level),
+		ID:         id,
+		Level:      int16(level),
 		ModifiedAt: time.Now(),
 	})
 	if err != nil {
@@ -69,6 +73,10 @@ func (tg *TelegramBot) commandAddAdmin(b *gotgbot.Bot, ctx *ext.Context) error {
 }
 
 func (tg *TelegramBot) commandRemoveAdmin(b *gotgbot.Bot, ctx *ext.Context) error {
+	if ctx.EffectiveSender.IsUser() && ctx.EffectiveChat.Id == ctx.EffectiveSender.Id() {
+		return nil
+	}
+
 	msg := ctx.EffectiveMessage
 	if msg.Text == "" {
 		return nil
@@ -102,6 +110,10 @@ func (tg *TelegramBot) commandRemoveAdmin(b *gotgbot.Bot, ctx *ext.Context) erro
 }
 
 func (tg *TelegramBot) commandAlterAdmin(b *gotgbot.Bot, ctx *ext.Context) error {
+	if ctx.EffectiveSender.IsUser() && ctx.EffectiveChat.Id == ctx.EffectiveSender.Id() {
+		return nil
+	}
+
 	msg := ctx.EffectiveMessage
 	if msg.Text == "" {
 		return nil

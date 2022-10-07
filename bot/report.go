@@ -36,6 +36,10 @@ func GenReportInlineKeyboard(uid int64, reportId int) gotgbot.InlineKeyboardMark
 }
 
 func (tg *TelegramBot) commandReport(b *gotgbot.Bot, ctx *ext.Context) error {
+	if ctx.EffectiveSender.IsUser() && ctx.EffectiveChat.Id == ctx.EffectiveSender.Id() {
+		return nil
+	}
+
 	msg := ctx.EffectiveMessage
 
 	var text string
