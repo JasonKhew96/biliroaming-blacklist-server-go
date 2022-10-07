@@ -76,6 +76,12 @@ func ParseDuration(duration string) (*time.Time, error) {
 	case "h", "H": // hour
 		newTime := now.Add(time.Hour * time.Duration(add))
 		return &newTime, nil
+	case "d", "D": // day
+		newTime := now.AddDate(0, 0, add)
+		return &newTime, nil
+	case "w", "W": // week
+		newTime := now.AddDate(0, 0, add*7)
+		return &newTime, nil
 	case "m", "M": // month
 		newTime := now.AddDate(0, add, 0)
 		return &newTime, nil
