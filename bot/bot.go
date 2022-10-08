@@ -51,6 +51,8 @@ func New(db *db.Database, config config.TelegramConfig, sugar *zap.SugaredLogger
 	})
 	dispatcher := updater.Dispatcher
 
+	dispatcher.AddHandler(handlers.NewCommand("help", tg.commandHelp))
+
 	// super admin
 	dispatcher.AddHandler(handlers.NewCommand("addadmin", tg.commandAddAdmin))
 	dispatcher.AddHandler(handlers.NewCommand("removeadmin", tg.commandRemoveAdmin))
