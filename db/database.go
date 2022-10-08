@@ -119,6 +119,10 @@ func (db *Database) GetTotalUser() (int64, error) {
 	return models.BilibiliUsers().Count(db.context, db.db)
 }
 
+func (db *Database) GetTotalBannedUser() (int64, error) {
+	return models.BilibiliUsers(models.BilibiliUserWhere.BanUntil.GT(null.TimeFrom(time.Now()))).Count(db.context, db.db)
+}
+
 // records
 
 func (db *Database) InsertRecord(uid int64, description string, chatId, msgId int64, approvedBy int64) (int, error) {
