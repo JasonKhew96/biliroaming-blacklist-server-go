@@ -3,22 +3,32 @@
 <h1>{{.Title}}</h1>
 
 <form action="/check" method="post">
-  <label for="inputUid">UID</label>
-  <br />
-  <input
-    type="text"
-    id="inputUid"
-    name="uid"
-    placeholder="208259"
-    pattern="\d+"
-    required
-  />
-  <br />
-  <div class="cf-turnstile" data-sitekey="{{ .SiteKey }}"></div>
-  <br />
-  <input type="submit" value="Submit" />
+  <div class="mb-3">
+    <label class="form-label" for="inputUid">UID: </label>
+    <input
+      class="form-control"
+      style="width: 300px"
+      type="text"
+      id="inputUid"
+      name="uid"
+      placeholder="208259"
+      pattern="\d+"
+      required
+    />
+  </div>
+  <div class="mb-3">
+    <div
+      class="cf-turnstile"
+      data-callback="onCaptchasDone"
+      data-sitekey="{{ .SiteKey }}"
+    ></div>
+  </div>
+  <div class="mb-3">
+    <button class="btn btn-primary" id="btnSubmit" type="submit" disabled>
+      查询
+    </button>
+  </div>
 </form>
-
 <script>
   const inputUid = document.querySelector("#inputUid");
 
@@ -34,6 +44,10 @@
       inputUid.setCustomValidity("格式错误");
     }
   });
+
+  function onCaptchasDone(token) {
+    document.querySelector("#btnSubmit").disabled = false;
+  }
 </script>
 <script
   src="https://challenges.cloudflare.com/turnstile/v0/api.js"

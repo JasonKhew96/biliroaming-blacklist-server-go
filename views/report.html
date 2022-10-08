@@ -7,21 +7,23 @@
 {{ end }}
 
 <form action="/report" method="post" enctype="multipart/form-data">
-  <p>
-    <label for="file">截图证据: </label>
-    <br>
+  <div class="mb-2">
+    <label class="form-label" for="file">截图证据: </label>
     <input
+      class="form-control"
+      style="width: 300px"
       type="file"
       id="file"
       name="file"
       accept="image/jpeg,image/png,video/mp4"
       required
     />
-  </p>
-  <p>
-    <label for="uid">UID: </label>
-    <br>
+  </div>
+  <div class="mb-2">
+    <label class="form-label" for="uid">UID: </label>
     <input
+      class="form-control"
+      style="width: 300px"
       type="text"
       id="inputUid"
       name="uid"
@@ -29,23 +31,30 @@
       pattern="\d+"
       required
     />
-  </p>
-  <p>
-    <label for="description">描述: </label>
-    <br>
+  </div>
+  <div class="mb-2">
+    <label class="form-label" for="description">描述: </label>
     <textarea
+      class="form-control"
+      style="width: 300px;"
       id="description"
       name="description"
       placeholder="描述"
       required
     ></textarea>
-  </p>
-  <p>
-    <div class="cf-turnstile" data-sitekey="{{ .SiteKey }}"></div>
-  </p>
-  <p>
-    <input type="submit" value="Submit" />
-  </p>
+  </div>
+  <div class="mb-2">
+    <div
+      class="cf-turnstile"
+      data-callback="onCaptchasDone"
+      data-sitekey="{{ .SiteKey }}"
+    ></div>
+  </div>
+  <div class="mb-2" >
+    <button class="btn btn-primary" id="btnSubmit" type="submit" disabled>
+      举报
+    </button>
+  </div>
 </form>
 
 <script>
@@ -63,6 +72,10 @@
       inputUid.setCustomValidity("格式错误");
     }
   });
+
+  function onCaptchasDone(token) {
+    document.querySelector("#btnSubmit").disabled = false;
+  }
 </script>
 <script
   src="https://challenges.cloudflare.com/turnstile/v0/api.js"
