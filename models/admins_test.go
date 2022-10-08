@@ -568,7 +568,7 @@ func testAdminsSelect(t *testing.T) {
 }
 
 var (
-	adminDBTypes = map[string]string{`ID`: `bigint`, `Level`: `smallint`, `CreatedAt`: `timestamp without time zone`, `ModifiedAt`: `timestamp without time zone`}
+	adminDBTypes = map[string]string{`ID`: `bigint`, `Level`: `smallint`, `CreatedAt`: `timestamp with time zone`, `UpdatedAt`: `timestamp with time zone`}
 	_            = bytes.MinRead
 )
 

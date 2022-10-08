@@ -59,9 +59,9 @@ func (tg *TelegramBot) commandAddAdmin(b *gotgbot.Bot, ctx *ext.Context) error {
 	}
 
 	err = tg.db.UpsertAdmin(&models.Admin{
-		ID:         id,
-		Level:      int16(level),
-		ModifiedAt: time.Now(),
+		ID:        id,
+		Level:     int16(level),
+		UpdatedAt: time.Now(),
 	})
 	if err != nil {
 		tg.sugar.Errorf("failed to upsert admin: %s", err.Error())
@@ -154,7 +154,7 @@ func (tg *TelegramBot) commandAlterAdmin(b *gotgbot.Bot, ctx *ext.Context) error
 	}
 
 	admin.Level = int16(level)
-	admin.ModifiedAt = time.Now()
+	admin.UpdatedAt = time.Now()
 
 	err = tg.db.UpsertAdmin(admin)
 	if err != nil {

@@ -118,7 +118,7 @@ func (tg *TelegramBot) commandReport(b *gotgbot.Bot, ctx *ext.Context) error {
 		return err
 	}
 
-	reportId, err := tg.db.InsertReport(uid, description, fileType, fileId)
+	reportId, err := tg.db.InsertReport(uid, description, fileType, fileId, fmt.Sprintf("TG@%d", ctx.EffectiveSender.Id()))
 	if err != nil {
 		tg.sugar.Errorf("failed to insert report: %v", err)
 		_, err := ctx.EffectiveMessage.Reply(b, "数据库错误", nil)
@@ -257,7 +257,7 @@ func (tg *TelegramBot) callbackReportResp(b *gotgbot.Bot, ctx *ext.Context) erro
 			return err
 		}
 
-		if _, err = tg.db.InsertRecord(report.UID, report.Description, msg.Chat.Id, msg.MessageId); err != nil {
+		if _, err = tg.db.InsertRecord(report.UID, report.Description, msg.Chat.Id, msg.MessageId, ctx.CallbackQuery.From.Id); err != nil {
 			tg.sugar.Errorf("failed to insert record: %v", err)
 			return err
 		}

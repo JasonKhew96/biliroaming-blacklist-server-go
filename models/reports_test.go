@@ -568,7 +568,7 @@ func testReportsSelect(t *testing.T) {
 }
 
 var (
-	reportDBTypes = map[string]string{`ReportID`: `integer`, `UID`: `bigint`, `Description`: `text`, `FileType`: `smallint`, `FileID`: `text`, `CreatedAt`: `timestamp without time zone`, `ModifiedAt`: `timestamp without time zone`}
+	reportDBTypes = map[string]string{`ReportID`: `integer`, `UID`: `bigint`, `Description`: `text`, `FileType`: `smallint`, `FileID`: `text`, `SubmitBy`: `text`, `CreatedAt`: `timestamp with time zone`, `UpdatedAt`: `timestamp with time zone`}
 	_             = bytes.MinRead
 )
 

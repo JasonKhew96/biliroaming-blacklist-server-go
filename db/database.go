@@ -22,16 +22,16 @@ type Database struct {
 // bilibili_users
 
 func (db *Database) UpsertBiliUser(biliUser *models.BilibiliUser) error {
-	return biliUser.Upsert(db.context, db.db, true, []string{"uid"}, boil.Whitelist("counter", "is_whitelist", "ban_until", "modified_at"), boil.Infer())
+	return biliUser.Upsert(db.context, db.db, true, []string{"uid"}, boil.Whitelist("counter", "is_whitelist", "ban_until", "updated_at"), boil.Infer())
 }
 
 func (db *Database) BanBiliUser(uid int64, banUntil time.Time) error {
 	biliUser, err := db.GetBiliUser(uid)
 	if err != nil && err == sql.ErrNoRows {
 		return db.UpsertBiliUser(&models.BilibiliUser{
-			UID:      uid,
-			BanUntil: null.TimeFrom(banUntil),
-			ModifiedAt: time.Now(),
+			UID:       uid,
+			BanUntil:  null.TimeFrom(banUntil),
+			UpdatedAt: time.Now(),
 		})
 	} else if err != nil {
 		return err
@@ -46,7 +46,7 @@ func (db *Database) UnbanBiliUser(uid int64) error {
 		return err
 	}
 	biliUser.BanUntil = null.TimeFrom(time.Time{})
-	biliUser.ModifiedAt = time.Now()
+	biliUser.UpdatedAt = time.Now()
 	return db.UpsertBiliUser(biliUser)
 }
 
@@ -56,7 +56,7 @@ func (db *Database) WhiteBiliUser(uid int64, white bool) error {
 		return db.UpsertBiliUser(&models.BilibiliUser{
 			UID:         uid,
 			IsWhitelist: white,
-			ModifiedAt: time.Now(),
+			UpdatedAt:   time.Now(),
 		})
 	} else if err != nil {
 		return err
@@ -73,9 +73,9 @@ func (db *Database) IncBiliUserCounter(uid int64) (int64, error) {
 	biliUser, err := db.GetBiliUser(uid)
 	if err == sql.ErrNoRows {
 		if err := db.UpsertBiliUser(&models.BilibiliUser{
-			UID:     uid,
-			Counter: 1,
-			ModifiedAt: time.Now(),
+			UID:       uid,
+			Counter:   1,
+			UpdatedAt: time.Now(),
 		}); err != nil {
 			return -1, err
 		}
@@ -83,18 +83,18 @@ func (db *Database) IncBiliUserCounter(uid int64) (int64, error) {
 	} else if err != nil {
 		return -1, err
 	}
-	if biliUser.ModifiedAt.Before(time.Now().Add(15 * time.Minute)) {
+	if biliUser.UpdatedAt.Before(time.Now().Add(15 * time.Minute)) {
 		return 0, nil
 	}
 	biliUser.Counter++
-	biliUser.ModifiedAt = time.Now()
+	biliUser.UpdatedAt = time.Now()
 	return biliUser.Update(db.context, db.db, boil.Infer())
 }
 
 // admins
 
 func (db *Database) UpsertAdmin(admin *models.Admin) error {
-	return admin.Upsert(db.context, db.db, true, []string{"id"}, boil.Whitelist("permissions", "modified_at"), boil.Infer())
+	return admin.Upsert(db.context, db.db, true, []string{"id"}, boil.Whitelist("permissions", "updated_at"), boil.Infer())
 }
 
 func (db *Database) GetAdmin(id int64) (*models.Admin, error) {
@@ -112,26 +112,26 @@ func (db *Database) RemoveAdmin(id int64) (int64, error) {
 // users
 
 func (db *Database) GetUserRecords(uid int64) (models.RecordSlice, error) {
-	return models.Records(models.RecordWhere.UID.EQ(uid), qm.OrderBy("modified_at DESC", qm.Limit(8))).All(db.context, db.db)
+	return models.Records(models.RecordWhere.UID.EQ(uid), qm.OrderBy("updated_at DESC", qm.Limit(8))).All(db.context, db.db)
 }
 
 func (db *Database) GetTotalUser() (int64, error) {
 	return models.BilibiliUsers().Count(db.context, db.db)
 }
 
-func (db *Database) InsertRecord(uid int64, description string, chatId, msgId int64) (int, error) {
+// records
+
+func (db *Database) InsertRecord(uid int64, description string, chatId, msgId int64, approvedBy int64) (int, error) {
 	record := models.Record{
 		UID:         uid,
 		Description: description,
 		ChatID:      null.Int64From(chatId),
 		MessageID:   null.Int64From(msgId),
+		ApprovedBy:  null.Int64From(approvedBy),
 	}
-	// https://t.me/c/1755746887/1236
 	err := record.Insert(db.context, db.db, boil.Infer())
 	return record.RecordID, err
 }
-
-// records
 
 func (db *Database) GetTotalRecord() (int64, error) {
 	return models.Records().Count(db.context, db.db)
@@ -142,11 +142,11 @@ func (db *Database) GetRecordCount(uid int64) (int64, error) {
 }
 
 func (db *Database) GetRecord(uid int64, offset int) (*models.Record, error) {
-	return models.Records(models.RecordWhere.UID.EQ(uid), qm.OrderBy("modified_at DESC"), qm.Offset(offset)).One(db.context, db.db)
+	return models.Records(models.RecordWhere.UID.EQ(uid), qm.OrderBy("updated_at DESC"), qm.Offset(offset)).One(db.context, db.db)
 }
 
 func (db *Database) GetRecords(uid int64, limit int) (models.RecordSlice, error) {
-	return models.Records(models.RecordWhere.UID.EQ(uid), qm.OrderBy("modified_at DESC"), qm.Limit(limit)).All(db.context, db.db)
+	return models.Records(models.RecordWhere.UID.EQ(uid), qm.OrderBy("updated_at DESC"), qm.Limit(limit)).All(db.context, db.db)
 }
 
 // reports
@@ -163,12 +163,13 @@ func (db *Database) GetTotalReport() (int64, error) {
 	return models.Reports().Count(db.context, db.db)
 }
 
-func (db *Database) InsertReport(uid int64, description string, fileType int16, fileId string) (int, error) {
+func (db *Database) InsertReport(uid int64, description string, fileType int16, fileId string, ip string) (int, error) {
 	report := models.Report{
 		UID:         uid,
 		Description: description,
 		FileType:    fileType,
 		FileID:      fileId,
+		SubmitBy:    null.StringFrom(ip),
 	}
 	err := report.Insert(db.context, db.db, boil.Infer())
 	return report.ReportID, err
@@ -181,7 +182,7 @@ func (db *Database) UpdateReport(reportId int, fileType int16, fileId string) (i
 	}
 	report.FileType = fileType
 	report.FileID = fileId
-	report.ModifiedAt = time.Now()
+	report.UpdatedAt = time.Now()
 	return report.Update(db.context, db.db, boil.Infer())
 }
 

@@ -29,8 +29,9 @@ type Record struct {
 	Description string     `boil:"description" json:"description" toml:"description" yaml:"description"`
 	ChatID      null.Int64 `boil:"chat_id" json:"chat_id,omitempty" toml:"chat_id" yaml:"chat_id,omitempty"`
 	MessageID   null.Int64 `boil:"message_id" json:"message_id,omitempty" toml:"message_id" yaml:"message_id,omitempty"`
+	ApprovedBy  null.Int64 `boil:"approved_by" json:"approved_by,omitempty" toml:"approved_by" yaml:"approved_by,omitempty"`
 	CreatedAt   time.Time  `boil:"created_at" json:"created_at" toml:"created_at" yaml:"created_at"`
-	ModifiedAt  time.Time  `boil:"modified_at" json:"modified_at" toml:"modified_at" yaml:"modified_at"`
+	UpdatedAt   time.Time  `boil:"updated_at" json:"updated_at" toml:"updated_at" yaml:"updated_at"`
 
 	R *recordR `boil:"-" json:"-" toml:"-" yaml:"-"`
 	L recordL  `boil:"-" json:"-" toml:"-" yaml:"-"`
@@ -42,16 +43,18 @@ var RecordColumns = struct {
 	Description string
 	ChatID      string
 	MessageID   string
+	ApprovedBy  string
 	CreatedAt   string
-	ModifiedAt  string
+	UpdatedAt   string
 }{
 	RecordID:    "record_id",
 	UID:         "uid",
 	Description: "description",
 	ChatID:      "chat_id",
 	MessageID:   "message_id",
+	ApprovedBy:  "approved_by",
 	CreatedAt:   "created_at",
-	ModifiedAt:  "modified_at",
+	UpdatedAt:   "updated_at",
 }
 
 var RecordTableColumns = struct {
@@ -60,16 +63,18 @@ var RecordTableColumns = struct {
 	Description string
 	ChatID      string
 	MessageID   string
+	ApprovedBy  string
 	CreatedAt   string
-	ModifiedAt  string
+	UpdatedAt   string
 }{
 	RecordID:    "records.record_id",
 	UID:         "records.uid",
 	Description: "records.description",
 	ChatID:      "records.chat_id",
 	MessageID:   "records.message_id",
+	ApprovedBy:  "records.approved_by",
 	CreatedAt:   "records.created_at",
-	ModifiedAt:  "records.modified_at",
+	UpdatedAt:   "records.updated_at",
 }
 
 // Generated where
@@ -164,16 +169,18 @@ var RecordWhere = struct {
 	Description whereHelperstring
 	ChatID      whereHelpernull_Int64
 	MessageID   whereHelpernull_Int64
+	ApprovedBy  whereHelpernull_Int64
 	CreatedAt   whereHelpertime_Time
-	ModifiedAt  whereHelpertime_Time
+	UpdatedAt   whereHelpertime_Time
 }{
 	RecordID:    whereHelperint{field: "\"records\".\"record_id\""},
 	UID:         whereHelperint64{field: "\"records\".\"uid\""},
 	Description: whereHelperstring{field: "\"records\".\"description\""},
 	ChatID:      whereHelpernull_Int64{field: "\"records\".\"chat_id\""},
 	MessageID:   whereHelpernull_Int64{field: "\"records\".\"message_id\""},
+	ApprovedBy:  whereHelpernull_Int64{field: "\"records\".\"approved_by\""},
 	CreatedAt:   whereHelpertime_Time{field: "\"records\".\"created_at\""},
-	ModifiedAt:  whereHelpertime_Time{field: "\"records\".\"modified_at\""},
+	UpdatedAt:   whereHelpertime_Time{field: "\"records\".\"updated_at\""},
 }
 
 // RecordRels is where relationship names are stored.
@@ -193,9 +200,9 @@ func (*recordR) NewStruct() *recordR {
 type recordL struct{}
 
 var (
-	recordAllColumns            = []string{"record_id", "uid", "description", "chat_id", "message_id", "created_at", "modified_at"}
+	recordAllColumns            = []string{"record_id", "uid", "description", "chat_id", "message_id", "approved_by", "created_at", "updated_at"}
 	recordColumnsWithoutDefault = []string{"uid", "description"}
-	recordColumnsWithDefault    = []string{"record_id", "chat_id", "message_id", "created_at", "modified_at"}
+	recordColumnsWithDefault    = []string{"record_id", "chat_id", "message_id", "approved_by", "created_at", "updated_at"}
 	recordPrimaryKeyColumns     = []string{"record_id"}
 	recordGeneratedColumns      = []string{}
 )
@@ -533,6 +540,9 @@ func (o *Record) Insert(ctx context.Context, exec boil.ContextExecutor, columns 
 		if o.CreatedAt.IsZero() {
 			o.CreatedAt = currTime
 		}
+		if o.UpdatedAt.IsZero() {
+			o.UpdatedAt = currTime
+		}
 	}
 
 	if err := o.doBeforeInsertHooks(ctx, exec); err != nil {
@@ -609,6 +619,12 @@ func (o *Record) Insert(ctx context.Context, exec boil.ContextExecutor, columns 
 // See boil.Columns.UpdateColumnSet documentation to understand column list inference for updates.
 // Update does not automatically update the record in case of default values. Use .Reload() to refresh the records.
 func (o *Record) Update(ctx context.Context, exec boil.ContextExecutor, columns boil.Columns) (int64, error) {
+	if !boil.TimestampsAreSkipped(ctx) {
+		currTime := time.Now().In(boil.GetLocation())
+
+		o.UpdatedAt = currTime
+	}
+
 	var err error
 	if err = o.doBeforeUpdateHooks(ctx, exec); err != nil {
 		return 0, err
@@ -745,6 +761,7 @@ func (o *Record) Upsert(ctx context.Context, exec boil.ContextExecutor, updateOn
 		if o.CreatedAt.IsZero() {
 			o.CreatedAt = currTime
 		}
+		o.UpdatedAt = currTime
 	}
 
 	if err := o.doBeforeUpsertHooks(ctx, exec); err != nil {

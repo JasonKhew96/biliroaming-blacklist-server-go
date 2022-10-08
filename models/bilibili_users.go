@@ -29,7 +29,7 @@ type BilibiliUser struct {
 	IsWhitelist bool      `boil:"is_whitelist" json:"is_whitelist" toml:"is_whitelist" yaml:"is_whitelist"`
 	BanUntil    null.Time `boil:"ban_until" json:"ban_until,omitempty" toml:"ban_until" yaml:"ban_until,omitempty"`
 	CreatedAt   time.Time `boil:"created_at" json:"created_at" toml:"created_at" yaml:"created_at"`
-	ModifiedAt  time.Time `boil:"modified_at" json:"modified_at" toml:"modified_at" yaml:"modified_at"`
+	UpdatedAt   time.Time `boil:"updated_at" json:"updated_at" toml:"updated_at" yaml:"updated_at"`
 
 	R *bilibiliUserR `boil:"-" json:"-" toml:"-" yaml:"-"`
 	L bilibiliUserL  `boil:"-" json:"-" toml:"-" yaml:"-"`
@@ -41,14 +41,14 @@ var BilibiliUserColumns = struct {
 	IsWhitelist string
 	BanUntil    string
 	CreatedAt   string
-	ModifiedAt  string
+	UpdatedAt   string
 }{
 	UID:         "uid",
 	Counter:     "counter",
 	IsWhitelist: "is_whitelist",
 	BanUntil:    "ban_until",
 	CreatedAt:   "created_at",
-	ModifiedAt:  "modified_at",
+	UpdatedAt:   "updated_at",
 }
 
 var BilibiliUserTableColumns = struct {
@@ -57,14 +57,14 @@ var BilibiliUserTableColumns = struct {
 	IsWhitelist string
 	BanUntil    string
 	CreatedAt   string
-	ModifiedAt  string
+	UpdatedAt   string
 }{
 	UID:         "bilibili_users.uid",
 	Counter:     "bilibili_users.counter",
 	IsWhitelist: "bilibili_users.is_whitelist",
 	BanUntil:    "bilibili_users.ban_until",
 	CreatedAt:   "bilibili_users.created_at",
-	ModifiedAt:  "bilibili_users.modified_at",
+	UpdatedAt:   "bilibili_users.updated_at",
 }
 
 // Generated where
@@ -108,14 +108,14 @@ var BilibiliUserWhere = struct {
 	IsWhitelist whereHelperbool
 	BanUntil    whereHelpernull_Time
 	CreatedAt   whereHelpertime_Time
-	ModifiedAt  whereHelpertime_Time
+	UpdatedAt   whereHelpertime_Time
 }{
 	UID:         whereHelperint64{field: "\"bilibili_users\".\"uid\""},
 	Counter:     whereHelperint64{field: "\"bilibili_users\".\"counter\""},
 	IsWhitelist: whereHelperbool{field: "\"bilibili_users\".\"is_whitelist\""},
 	BanUntil:    whereHelpernull_Time{field: "\"bilibili_users\".\"ban_until\""},
 	CreatedAt:   whereHelpertime_Time{field: "\"bilibili_users\".\"created_at\""},
-	ModifiedAt:  whereHelpertime_Time{field: "\"bilibili_users\".\"modified_at\""},
+	UpdatedAt:   whereHelpertime_Time{field: "\"bilibili_users\".\"updated_at\""},
 }
 
 // BilibiliUserRels is where relationship names are stored.
@@ -135,9 +135,9 @@ func (*bilibiliUserR) NewStruct() *bilibiliUserR {
 type bilibiliUserL struct{}
 
 var (
-	bilibiliUserAllColumns            = []string{"uid", "counter", "is_whitelist", "ban_until", "created_at", "modified_at"}
+	bilibiliUserAllColumns            = []string{"uid", "counter", "is_whitelist", "ban_until", "created_at", "updated_at"}
 	bilibiliUserColumnsWithoutDefault = []string{"uid"}
-	bilibiliUserColumnsWithDefault    = []string{"counter", "is_whitelist", "ban_until", "created_at", "modified_at"}
+	bilibiliUserColumnsWithDefault    = []string{"counter", "is_whitelist", "ban_until", "created_at", "updated_at"}
 	bilibiliUserPrimaryKeyColumns     = []string{"uid"}
 	bilibiliUserGeneratedColumns      = []string{}
 )
@@ -475,6 +475,9 @@ func (o *BilibiliUser) Insert(ctx context.Context, exec boil.ContextExecutor, co
 		if o.CreatedAt.IsZero() {
 			o.CreatedAt = currTime
 		}
+		if o.UpdatedAt.IsZero() {
+			o.UpdatedAt = currTime
+		}
 	}
 
 	if err := o.doBeforeInsertHooks(ctx, exec); err != nil {
@@ -551,6 +554,12 @@ func (o *BilibiliUser) Insert(ctx context.Context, exec boil.ContextExecutor, co
 // See boil.Columns.UpdateColumnSet documentation to understand column list inference for updates.
 // Update does not automatically update the record in case of default values. Use .Reload() to refresh the records.
 func (o *BilibiliUser) Update(ctx context.Context, exec boil.ContextExecutor, columns boil.Columns) (int64, error) {
+	if !boil.TimestampsAreSkipped(ctx) {
+		currTime := time.Now().In(boil.GetLocation())
+
+		o.UpdatedAt = currTime
+	}
+
 	var err error
 	if err = o.doBeforeUpdateHooks(ctx, exec); err != nil {
 		return 0, err
@@ -687,6 +696,7 @@ func (o *BilibiliUser) Upsert(ctx context.Context, exec boil.ContextExecutor, up
 		if o.CreatedAt.IsZero() {
 			o.CreatedAt = currTime
 		}
+		o.UpdatedAt = currTime
 	}
 
 	if err := o.doBeforeUpsertHooks(ctx, exec); err != nil {

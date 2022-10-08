@@ -568,7 +568,7 @@ func testBilibiliUsersSelect(t *testing.T) {
 }
 
 var (
-	bilibiliUserDBTypes = map[string]string{`UID`: `bigint`, `Counter`: `bigint`, `IsWhitelist`: `boolean`, `BanUntil`: `timestamp without time zone`, `CreatedAt`: `timestamp without time zone`, `ModifiedAt`: `timestamp without time zone`}
+	bilibiliUserDBTypes = map[string]string{`UID`: `bigint`, `Counter`: `bigint`, `IsWhitelist`: `boolean`, `BanUntil`: `timestamp with time zone`, `CreatedAt`: `timestamp with time zone`, `UpdatedAt`: `timestamp with time zone`}
 	_                   = bytes.MinRead
 )
 

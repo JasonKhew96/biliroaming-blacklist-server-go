@@ -107,7 +107,7 @@ func (w *Web) reportPost(c *fiber.Ctx) error {
 		return c.Render("report", fiberMap, "layouts/main")
 	}
 
-	reportId, err := w.db.InsertReport(uid, description, 0, "")
+	reportId, err := w.db.InsertReport(uid, description, 0, "", ip)
 	if err != nil {
 		fiberMap["Message"] = "保存举报信息失败"
 		return c.Render("report", fiberMap, "layouts/main")

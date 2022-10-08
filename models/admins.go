@@ -23,37 +23,37 @@ import (
 
 // Admin is an object representing the database table.
 type Admin struct {
-	ID         int64     `boil:"id" json:"id" toml:"id" yaml:"id"`
-	Level      int16     `boil:"level" json:"level" toml:"level" yaml:"level"`
-	CreatedAt  time.Time `boil:"created_at" json:"created_at" toml:"created_at" yaml:"created_at"`
-	ModifiedAt time.Time `boil:"modified_at" json:"modified_at" toml:"modified_at" yaml:"modified_at"`
+	ID        int64     `boil:"id" json:"id" toml:"id" yaml:"id"`
+	Level     int16     `boil:"level" json:"level" toml:"level" yaml:"level"`
+	CreatedAt time.Time `boil:"created_at" json:"created_at" toml:"created_at" yaml:"created_at"`
+	UpdatedAt time.Time `boil:"updated_at" json:"updated_at" toml:"updated_at" yaml:"updated_at"`
 
 	R *adminR `boil:"-" json:"-" toml:"-" yaml:"-"`
 	L adminL  `boil:"-" json:"-" toml:"-" yaml:"-"`
 }
 
 var AdminColumns = struct {
-	ID         string
-	Level      string
-	CreatedAt  string
-	ModifiedAt string
+	ID        string
+	Level     string
+	CreatedAt string
+	UpdatedAt string
 }{
-	ID:         "id",
-	Level:      "level",
-	CreatedAt:  "created_at",
-	ModifiedAt: "modified_at",
+	ID:        "id",
+	Level:     "level",
+	CreatedAt: "created_at",
+	UpdatedAt: "updated_at",
 }
 
 var AdminTableColumns = struct {
-	ID         string
-	Level      string
-	CreatedAt  string
-	ModifiedAt string
+	ID        string
+	Level     string
+	CreatedAt string
+	UpdatedAt string
 }{
-	ID:         "admins.id",
-	Level:      "admins.level",
-	CreatedAt:  "admins.created_at",
-	ModifiedAt: "admins.modified_at",
+	ID:        "admins.id",
+	Level:     "admins.level",
+	CreatedAt: "admins.created_at",
+	UpdatedAt: "admins.updated_at",
 }
 
 // Generated where
@@ -126,15 +126,15 @@ func (w whereHelpertime_Time) GTE(x time.Time) qm.QueryMod {
 }
 
 var AdminWhere = struct {
-	ID         whereHelperint64
-	Level      whereHelperint16
-	CreatedAt  whereHelpertime_Time
-	ModifiedAt whereHelpertime_Time
+	ID        whereHelperint64
+	Level     whereHelperint16
+	CreatedAt whereHelpertime_Time
+	UpdatedAt whereHelpertime_Time
 }{
-	ID:         whereHelperint64{field: "\"admins\".\"id\""},
-	Level:      whereHelperint16{field: "\"admins\".\"level\""},
-	CreatedAt:  whereHelpertime_Time{field: "\"admins\".\"created_at\""},
-	ModifiedAt: whereHelpertime_Time{field: "\"admins\".\"modified_at\""},
+	ID:        whereHelperint64{field: "\"admins\".\"id\""},
+	Level:     whereHelperint16{field: "\"admins\".\"level\""},
+	CreatedAt: whereHelpertime_Time{field: "\"admins\".\"created_at\""},
+	UpdatedAt: whereHelpertime_Time{field: "\"admins\".\"updated_at\""},
 }
 
 // AdminRels is where relationship names are stored.
@@ -154,9 +154,9 @@ func (*adminR) NewStruct() *adminR {
 type adminL struct{}
 
 var (
-	adminAllColumns            = []string{"id", "level", "created_at", "modified_at"}
+	adminAllColumns            = []string{"id", "level", "created_at", "updated_at"}
 	adminColumnsWithoutDefault = []string{"id"}
-	adminColumnsWithDefault    = []string{"level", "created_at", "modified_at"}
+	adminColumnsWithDefault    = []string{"level", "created_at", "updated_at"}
 	adminPrimaryKeyColumns     = []string{"id"}
 	adminGeneratedColumns      = []string{}
 )
@@ -494,6 +494,9 @@ func (o *Admin) Insert(ctx context.Context, exec boil.ContextExecutor, columns b
 		if o.CreatedAt.IsZero() {
 			o.CreatedAt = currTime
 		}
+		if o.UpdatedAt.IsZero() {
+			o.UpdatedAt = currTime
+		}
 	}
 
 	if err := o.doBeforeInsertHooks(ctx, exec); err != nil {
@@ -570,6 +573,12 @@ func (o *Admin) Insert(ctx context.Context, exec boil.ContextExecutor, columns b
 // See boil.Columns.UpdateColumnSet documentation to understand column list inference for updates.
 // Update does not automatically update the record in case of default values. Use .Reload() to refresh the records.
 func (o *Admin) Update(ctx context.Context, exec boil.ContextExecutor, columns boil.Columns) (int64, error) {
+	if !boil.TimestampsAreSkipped(ctx) {
+		currTime := time.Now().In(boil.GetLocation())
+
+		o.UpdatedAt = currTime
+	}
+
 	var err error
 	if err = o.doBeforeUpdateHooks(ctx, exec); err != nil {
 		return 0, err
@@ -706,6 +715,7 @@ func (o *Admin) Upsert(ctx context.Context, exec boil.ContextExecutor, updateOnC
 		if o.CreatedAt.IsZero() {
 			o.CreatedAt = currTime
 		}
+		o.UpdatedAt = currTime
 	}
 
 	if err := o.doBeforeUpsertHooks(ctx, exec); err != nil {

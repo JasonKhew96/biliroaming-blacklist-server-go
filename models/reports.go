@@ -14,6 +14,7 @@ import (
 	"time"
 
 	"github.com/friendsofgo/errors"
+	"github.com/volatiletech/null/v8"
 	"github.com/volatiletech/sqlboiler/v4/boil"
 	"github.com/volatiletech/sqlboiler/v4/queries"
 	"github.com/volatiletech/sqlboiler/v4/queries/qm"
@@ -23,13 +24,14 @@ import (
 
 // Report is an object representing the database table.
 type Report struct {
-	ReportID    int       `boil:"report_id" json:"report_id" toml:"report_id" yaml:"report_id"`
-	UID         int64     `boil:"uid" json:"uid" toml:"uid" yaml:"uid"`
-	Description string    `boil:"description" json:"description" toml:"description" yaml:"description"`
-	FileType    int16     `boil:"file_type" json:"file_type" toml:"file_type" yaml:"file_type"`
-	FileID      string    `boil:"file_id" json:"file_id" toml:"file_id" yaml:"file_id"`
-	CreatedAt   time.Time `boil:"created_at" json:"created_at" toml:"created_at" yaml:"created_at"`
-	ModifiedAt  time.Time `boil:"modified_at" json:"modified_at" toml:"modified_at" yaml:"modified_at"`
+	ReportID    int         `boil:"report_id" json:"report_id" toml:"report_id" yaml:"report_id"`
+	UID         int64       `boil:"uid" json:"uid" toml:"uid" yaml:"uid"`
+	Description string      `boil:"description" json:"description" toml:"description" yaml:"description"`
+	FileType    int16       `boil:"file_type" json:"file_type" toml:"file_type" yaml:"file_type"`
+	FileID      string      `boil:"file_id" json:"file_id" toml:"file_id" yaml:"file_id"`
+	SubmitBy    null.String `boil:"submit_by" json:"submit_by,omitempty" toml:"submit_by" yaml:"submit_by,omitempty"`
+	CreatedAt   time.Time   `boil:"created_at" json:"created_at" toml:"created_at" yaml:"created_at"`
+	UpdatedAt   time.Time   `boil:"updated_at" json:"updated_at" toml:"updated_at" yaml:"updated_at"`
 
 	R *reportR `boil:"-" json:"-" toml:"-" yaml:"-"`
 	L reportL  `boil:"-" json:"-" toml:"-" yaml:"-"`
@@ -41,16 +43,18 @@ var ReportColumns = struct {
 	Description string
 	FileType    string
 	FileID      string
+	SubmitBy    string
 	CreatedAt   string
-	ModifiedAt  string
+	UpdatedAt   string
 }{
 	ReportID:    "report_id",
 	UID:         "uid",
 	Description: "description",
 	FileType:    "file_type",
 	FileID:      "file_id",
+	SubmitBy:    "submit_by",
 	CreatedAt:   "created_at",
-	ModifiedAt:  "modified_at",
+	UpdatedAt:   "updated_at",
 }
 
 var ReportTableColumns = struct {
@@ -59,19 +63,59 @@ var ReportTableColumns = struct {
 	Description string
 	FileType    string
 	FileID      string
+	SubmitBy    string
 	CreatedAt   string
-	ModifiedAt  string
+	UpdatedAt   string
 }{
 	ReportID:    "reports.report_id",
 	UID:         "reports.uid",
 	Description: "reports.description",
 	FileType:    "reports.file_type",
 	FileID:      "reports.file_id",
+	SubmitBy:    "reports.submit_by",
 	CreatedAt:   "reports.created_at",
-	ModifiedAt:  "reports.modified_at",
+	UpdatedAt:   "reports.updated_at",
 }
 
 // Generated where
+
+type whereHelpernull_String struct{ field string }
+
+func (w whereHelpernull_String) EQ(x null.String) qm.QueryMod {
+	return qmhelper.WhereNullEQ(w.field, false, x)
+}
+func (w whereHelpernull_String) NEQ(x null.String) qm.QueryMod {
+	return qmhelper.WhereNullEQ(w.field, true, x)
+}
+func (w whereHelpernull_String) LT(x null.String) qm.QueryMod {
+	return qmhelper.Where(w.field, qmhelper.LT, x)
+}
+func (w whereHelpernull_String) LTE(x null.String) qm.QueryMod {
+	return qmhelper.Where(w.field, qmhelper.LTE, x)
+}
+func (w whereHelpernull_String) GT(x null.String) qm.QueryMod {
+	return qmhelper.Where(w.field, qmhelper.GT, x)
+}
+func (w whereHelpernull_String) GTE(x null.String) qm.QueryMod {
+	return qmhelper.Where(w.field, qmhelper.GTE, x)
+}
+func (w whereHelpernull_String) IN(slice []string) qm.QueryMod {
+	values := make([]interface{}, 0, len(slice))
+	for _, value := range slice {
+		values = append(values, value)
+	}
+	return qm.WhereIn(fmt.Sprintf("%s IN ?", w.field), values...)
+}
+func (w whereHelpernull_String) NIN(slice []string) qm.QueryMod {
+	values := make([]interface{}, 0, len(slice))
+	for _, value := range slice {
+		values = append(values, value)
+	}
+	return qm.WhereNotIn(fmt.Sprintf("%s NOT IN ?", w.field), values...)
+}
+
+func (w whereHelpernull_String) IsNull() qm.QueryMod    { return qmhelper.WhereIsNull(w.field) }
+func (w whereHelpernull_String) IsNotNull() qm.QueryMod { return qmhelper.WhereIsNotNull(w.field) }
 
 var ReportWhere = struct {
 	ReportID    whereHelperint
@@ -79,16 +123,18 @@ var ReportWhere = struct {
 	Description whereHelperstring
 	FileType    whereHelperint16
 	FileID      whereHelperstring
+	SubmitBy    whereHelpernull_String
 	CreatedAt   whereHelpertime_Time
-	ModifiedAt  whereHelpertime_Time
+	UpdatedAt   whereHelpertime_Time
 }{
 	ReportID:    whereHelperint{field: "\"reports\".\"report_id\""},
 	UID:         whereHelperint64{field: "\"reports\".\"uid\""},
 	Description: whereHelperstring{field: "\"reports\".\"description\""},
 	FileType:    whereHelperint16{field: "\"reports\".\"file_type\""},
 	FileID:      whereHelperstring{field: "\"reports\".\"file_id\""},
+	SubmitBy:    whereHelpernull_String{field: "\"reports\".\"submit_by\""},
 	CreatedAt:   whereHelpertime_Time{field: "\"reports\".\"created_at\""},
-	ModifiedAt:  whereHelpertime_Time{field: "\"reports\".\"modified_at\""},
+	UpdatedAt:   whereHelpertime_Time{field: "\"reports\".\"updated_at\""},
 }
 
 // ReportRels is where relationship names are stored.
@@ -108,9 +154,9 @@ func (*reportR) NewStruct() *reportR {
 type reportL struct{}
 
 var (
-	reportAllColumns            = []string{"report_id", "uid", "description", "file_type", "file_id", "created_at", "modified_at"}
+	reportAllColumns            = []string{"report_id", "uid", "description", "file_type", "file_id", "submit_by", "created_at", "updated_at"}
 	reportColumnsWithoutDefault = []string{"uid", "description", "file_type", "file_id"}
-	reportColumnsWithDefault    = []string{"report_id", "created_at", "modified_at"}
+	reportColumnsWithDefault    = []string{"report_id", "submit_by", "created_at", "updated_at"}
 	reportPrimaryKeyColumns     = []string{"report_id"}
 	reportGeneratedColumns      = []string{}
 )
@@ -448,6 +494,9 @@ func (o *Report) Insert(ctx context.Context, exec boil.ContextExecutor, columns 
 		if o.CreatedAt.IsZero() {
 			o.CreatedAt = currTime
 		}
+		if o.UpdatedAt.IsZero() {
+			o.UpdatedAt = currTime
+		}
 	}
 
 	if err := o.doBeforeInsertHooks(ctx, exec); err != nil {
@@ -524,6 +573,12 @@ func (o *Report) Insert(ctx context.Context, exec boil.ContextExecutor, columns 
 // See boil.Columns.UpdateColumnSet documentation to understand column list inference for updates.
 // Update does not automatically update the record in case of default values. Use .Reload() to refresh the records.
 func (o *Report) Update(ctx context.Context, exec boil.ContextExecutor, columns boil.Columns) (int64, error) {
+	if !boil.TimestampsAreSkipped(ctx) {
+		currTime := time.Now().In(boil.GetLocation())
+
+		o.UpdatedAt = currTime
+	}
+
 	var err error
 	if err = o.doBeforeUpdateHooks(ctx, exec); err != nil {
 		return 0, err
@@ -660,6 +715,7 @@ func (o *Report) Upsert(ctx context.Context, exec boil.ContextExecutor, updateOn
 		if o.CreatedAt.IsZero() {
 			o.CreatedAt = currTime
 		}
+		o.UpdatedAt = currTime
 	}
 
 	if err := o.doBeforeUpsertHooks(ctx, exec); err != nil {
