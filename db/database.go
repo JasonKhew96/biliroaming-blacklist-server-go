@@ -79,8 +79,12 @@ func (db *Database) IncBiliUserCounter(uid int64) (int64, error) {
 		}); err != nil {
 			return -1, err
 		}
+		return 1, nil
 	} else if err != nil {
 		return -1, err
+	}
+	if biliUser.ModifiedAt.Before(time.Now().Add(15 * time.Minute)) {
+		return 0, nil
 	}
 	biliUser.Counter++
 	biliUser.ModifiedAt = time.Now()
