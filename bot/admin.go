@@ -68,8 +68,9 @@ func (tg *TelegramBot) commandAddAdmin(b *gotgbot.Bot, ctx *ext.Context) error {
 		_, err := ctx.EffectiveMessage.Reply(b, "数据库错误", nil)
 		return err
 	}
-
-	return nil
+	
+	_, err = ctx.EffectiveMessage.Reply(b, "添加管理员成功", nil)
+	return err
 }
 
 func (tg *TelegramBot) commandRemoveAdmin(b *gotgbot.Bot, ctx *ext.Context) error {
@@ -106,7 +107,8 @@ func (tg *TelegramBot) commandRemoveAdmin(b *gotgbot.Bot, ctx *ext.Context) erro
 		return err
 	}
 
-	return nil
+	_, err = ctx.EffectiveMessage.Reply(b, "移除管理员成功", nil)
+	return err
 }
 
 func (tg *TelegramBot) commandAlterAdmin(b *gotgbot.Bot, ctx *ext.Context) error {
@@ -163,5 +165,6 @@ func (tg *TelegramBot) commandAlterAdmin(b *gotgbot.Bot, ctx *ext.Context) error
 		return err
 	}
 
-	return nil
+	_, err = ctx.EffectiveMessage.Reply(b, "修改管理员成功", nil)
+	return err
 }

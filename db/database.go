@@ -94,7 +94,7 @@ func (db *Database) IncBiliUserCounter(uid int64) (int64, error) {
 // admins
 
 func (db *Database) UpsertAdmin(admin *models.Admin) error {
-	return admin.Upsert(db.context, db.db, true, []string{"id"}, boil.Whitelist("permissions", "updated_at"), boil.Infer())
+	return admin.Upsert(db.context, db.db, true, []string{"id"}, boil.Whitelist("level", "updated_at"), boil.Infer())
 }
 
 func (db *Database) GetAdmin(id int64) (*models.Admin, error) {
