@@ -5,6 +5,7 @@ import (
 	"biliroaming-blacklist-server-go/config"
 	"biliroaming-blacklist-server-go/db"
 	"context"
+	"fmt"
 	"time"
 
 	"github.com/gofiber/fiber/v2"
@@ -35,22 +36,22 @@ func (w *Web) index(c *fiber.Ctx) error {
 	}, "layouts/main")
 }
 
-func New(db *db.Database, tg *bot.TelegramBot, conf config.CaptchasConfig, sugar *zap.SugaredLogger) {
+func New(db *db.Database, tg *bot.TelegramBot, port int, conf config.CaptchasConfig, sugar *zap.SugaredLogger) {
 	engine := html.New("./views", ".html")
 
 	app := fiber.New(fiber.Config{
-		Views: engine,
-		ReadTimeout: 60 * time.Second,
+		Views:        engine,
+		ReadTimeout:  60 * time.Second,
 		WriteTimeout: 60 * time.Second,
-		IdleTimeout: 60 * time.Second,
+		IdleTimeout:  60 * time.Second,
 	})
 
 	web := Web{
-		sugar: sugar,
-		db:  db,
-		ctx: context.Background(),
-		app: app,
-		tg:  tg,
+		sugar:  sugar,
+		db:     db,
+		ctx:    context.Background(),
+		app:    app,
+		tg:     tg,
 		config: conf,
 	}
 
@@ -62,7 +63,7 @@ func New(db *db.Database, tg *bot.TelegramBot, conf config.CaptchasConfig, sugar
 	app.Get("/report", web.reportGet)
 	app.Post("/report", web.reportPost)
 
-	if err := app.Listen(":7181"); err != nil {
+	if err := app.Listen(fmt.Sprintf(":%d", port)); err != nil {
 		sugar.Fatalln(err)
 	}
 }
