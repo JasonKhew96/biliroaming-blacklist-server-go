@@ -233,22 +233,22 @@ func (tg *TelegramBot) callbackReportResp(b *gotgbot.Bot, ctx *ext.Context) erro
 		var msg *gotgbot.Message
 		switch report.FileType {
 		case db.FILE_TYPE_ANIMATION:
-			msg, err = b.SendAnimation(ctx.EffectiveChat.Id, report.FileID, &gotgbot.SendAnimationOpts{
+			msg, err = b.SendAnimation(tg.AnnouceChatId, report.FileID, &gotgbot.SendAnimationOpts{
 				Caption:   newText,
 				ParseMode: "MarkdownV2",
 			})
 		case db.FILE_TYPE_DOCUMENT:
-			msg, err = b.SendDocument(ctx.EffectiveChat.Id, report.FileID, &gotgbot.SendDocumentOpts{
+			msg, err = b.SendDocument(tg.AnnouceChatId, report.FileID, &gotgbot.SendDocumentOpts{
 				Caption:   newText,
 				ParseMode: "MarkdownV2",
 			})
 		case db.FILE_TYPE_PHOTO:
-			msg, err = b.SendPhoto(ctx.EffectiveChat.Id, report.FileID, &gotgbot.SendPhotoOpts{
+			msg, err = b.SendPhoto(tg.AnnouceChatId, report.FileID, &gotgbot.SendPhotoOpts{
 				Caption:   newText,
 				ParseMode: "MarkdownV2",
 			})
 		case db.FILE_TYPE_VIDEO:
-			msg, err = b.SendVideo(ctx.EffectiveChat.Id, report.FileID, &gotgbot.SendVideoOpts{
+			msg, err = b.SendVideo(tg.AnnouceChatId, report.FileID, &gotgbot.SendVideoOpts{
 				Caption:   newText,
 				ParseMode: "MarkdownV2",
 			})
