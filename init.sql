@@ -13,6 +13,7 @@ CREATE TABLE bilibili_users (
     counter BIGINT NOT NULL DEFAULT 0,
     is_whitelist BOOLEAN NOT NULL DEFAULT FALSE,
     ban_until TIMESTAMP WITH TIME ZONE DEFAULT NULL,
+    requested_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT (now() at time zone 'utc'),
     created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT (now() at time zone 'utc'),
     updated_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT (now() at time zone 'utc')
 );

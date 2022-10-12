@@ -90,7 +90,7 @@ func (tg *TelegramBot) genUidResp(uid int64, isMarkdown bool, isAdmin bool) (str
 				text += fmt.Sprintf(
 					"请求次数: `%d`\n最后请求时间: `%s`\n",
 					user.Counter,
-					EscapeMarkdownV2(user.UpdatedAt.In(location).Format(TIME_FORMAT)),
+					EscapeMarkdownV2(user.RequestedAt.In(location).Format(TIME_FORMAT)),
 				)
 			}
 		}
@@ -101,7 +101,7 @@ func (tg *TelegramBot) genUidResp(uid int64, isMarkdown bool, isAdmin bool) (str
 				text += fmt.Sprintf(
 					"请求次数: %d\n最后请求时间: %s\n",
 					user.Counter,
-					user.UpdatedAt.In(location).Format(TIME_FORMAT),
+					user.RequestedAt.In(location).Format(TIME_FORMAT),
 				)
 			}
 		}

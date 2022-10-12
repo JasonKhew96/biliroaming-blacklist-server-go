@@ -30,6 +30,7 @@ type BilibiliUser struct {
 	BanUntil    null.Time `boil:"ban_until" json:"ban_until,omitempty" toml:"ban_until" yaml:"ban_until,omitempty"`
 	CreatedAt   time.Time `boil:"created_at" json:"created_at" toml:"created_at" yaml:"created_at"`
 	UpdatedAt   time.Time `boil:"updated_at" json:"updated_at" toml:"updated_at" yaml:"updated_at"`
+	RequestedAt time.Time `boil:"requested_at" json:"requested_at" toml:"requested_at" yaml:"requested_at"`
 
 	R *bilibiliUserR `boil:"-" json:"-" toml:"-" yaml:"-"`
 	L bilibiliUserL  `boil:"-" json:"-" toml:"-" yaml:"-"`
@@ -42,6 +43,7 @@ var BilibiliUserColumns = struct {
 	BanUntil    string
 	CreatedAt   string
 	UpdatedAt   string
+	RequestedAt string
 }{
 	UID:         "uid",
 	Counter:     "counter",
@@ -49,6 +51,7 @@ var BilibiliUserColumns = struct {
 	BanUntil:    "ban_until",
 	CreatedAt:   "created_at",
 	UpdatedAt:   "updated_at",
+	RequestedAt: "requested_at",
 }
 
 var BilibiliUserTableColumns = struct {
@@ -58,6 +61,7 @@ var BilibiliUserTableColumns = struct {
 	BanUntil    string
 	CreatedAt   string
 	UpdatedAt   string
+	RequestedAt string
 }{
 	UID:         "bilibili_users.uid",
 	Counter:     "bilibili_users.counter",
@@ -65,6 +69,7 @@ var BilibiliUserTableColumns = struct {
 	BanUntil:    "bilibili_users.ban_until",
 	CreatedAt:   "bilibili_users.created_at",
 	UpdatedAt:   "bilibili_users.updated_at",
+	RequestedAt: "bilibili_users.requested_at",
 }
 
 // Generated where
@@ -109,6 +114,7 @@ var BilibiliUserWhere = struct {
 	BanUntil    whereHelpernull_Time
 	CreatedAt   whereHelpertime_Time
 	UpdatedAt   whereHelpertime_Time
+	RequestedAt whereHelpertime_Time
 }{
 	UID:         whereHelperint64{field: "\"bilibili_users\".\"uid\""},
 	Counter:     whereHelperint64{field: "\"bilibili_users\".\"counter\""},
@@ -116,6 +122,7 @@ var BilibiliUserWhere = struct {
 	BanUntil:    whereHelpernull_Time{field: "\"bilibili_users\".\"ban_until\""},
 	CreatedAt:   whereHelpertime_Time{field: "\"bilibili_users\".\"created_at\""},
 	UpdatedAt:   whereHelpertime_Time{field: "\"bilibili_users\".\"updated_at\""},
+	RequestedAt: whereHelpertime_Time{field: "\"bilibili_users\".\"requested_at\""},
 }
 
 // BilibiliUserRels is where relationship names are stored.
@@ -135,9 +142,9 @@ func (*bilibiliUserR) NewStruct() *bilibiliUserR {
 type bilibiliUserL struct{}
 
 var (
-	bilibiliUserAllColumns            = []string{"uid", "counter", "is_whitelist", "ban_until", "created_at", "updated_at"}
+	bilibiliUserAllColumns            = []string{"uid", "counter", "is_whitelist", "ban_until", "created_at", "updated_at", "requested_at"}
 	bilibiliUserColumnsWithoutDefault = []string{"uid"}
-	bilibiliUserColumnsWithDefault    = []string{"counter", "is_whitelist", "ban_until", "created_at", "updated_at"}
+	bilibiliUserColumnsWithDefault    = []string{"counter", "is_whitelist", "ban_until", "created_at", "updated_at", "requested_at"}
 	bilibiliUserPrimaryKeyColumns     = []string{"uid"}
 	bilibiliUserGeneratedColumns      = []string{}
 )

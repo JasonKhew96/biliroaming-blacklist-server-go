@@ -88,11 +88,11 @@ func (db *Database) IncBiliUserCounter(uid int64) (int64, error) {
 	} else if err != nil {
 		return -1, err
 	}
-	if biliUser.UpdatedAt.Before(time.Now().Add(15 * time.Minute)) {
+	if biliUser.RequestedAt.Before(time.Now().Add(15 * time.Minute)) {
 		return 0, nil
 	}
 	biliUser.Counter++
-	biliUser.UpdatedAt = time.Now()
+	biliUser.RequestedAt = time.Now()
 	return db.UpdateBiliUser(biliUser)
 }
 
@@ -191,7 +191,6 @@ func (db *Database) UpdateReport(reportId int, fileType int16, fileId string) (i
 	}
 	report.FileType = fileType
 	report.FileID = fileId
-	report.UpdatedAt = time.Now()
 	return report.Update(db.context, db.db, boil.Infer())
 }
 
