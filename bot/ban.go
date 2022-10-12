@@ -55,7 +55,7 @@ func (tg *TelegramBot) commandBan(b *gotgbot.Bot, ctx *ext.Context) error {
 		}
 	}
 
-	err = tg.db.BanBiliUser(uid, *banUntil)
+	_, err = tg.db.BanBiliUser(uid, *banUntil)
 	if err != nil {
 		tg.sugar.Errorf("failed to ban user: %v", err)
 		_, err := ctx.EffectiveMessage.Reply(b, "数据库错误", nil)
@@ -111,7 +111,7 @@ func (tg *TelegramBot) commandUnban(b *gotgbot.Bot, ctx *ext.Context) error {
 		return err
 	}
 
-	err = tg.db.UnbanBiliUser(uid)
+	_, err = tg.db.UnbanBiliUser(uid)
 	if err != nil {
 		tg.sugar.Errorf("failed to unban user: %v", err)
 		_, err := ctx.EffectiveMessage.Reply(b, "数据库错误", nil)
