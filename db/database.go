@@ -40,7 +40,6 @@ func (db *Database) BanBiliUser(uid int64, banUntil time.Time) (int64, error) {
 		return -1, err
 	}
 	biliUser.BanUntil = null.TimeFrom(banUntil)
-	biliUser.UpdatedAt = time.Now()
 	return db.UpdateBiliUser(biliUser)
 }
 
@@ -55,7 +54,6 @@ func (db *Database) UnbanBiliUser(uid int64) (int64, error) {
 		return -1, err
 	}
 	biliUser.BanUntil = null.TimeFrom(time.Time{})
-	biliUser.UpdatedAt = time.Now()
 	return db.UpdateBiliUser(biliUser)
 }
 
