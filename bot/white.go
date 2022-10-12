@@ -36,7 +36,7 @@ func (tg *TelegramBot) commandWhite(b *gotgbot.Bot, ctx *ext.Context) error {
 		return err
 	}
 
-	err = tg.db.WhiteBiliUser(uid, true)
+	_, err = tg.db.WhiteBiliUser(uid, true)
 	if err != nil {
 		tg.sugar.Errorf("failed to whitelist user: %v", err)
 		_, err := ctx.EffectiveMessage.Reply(b, "数据库错误", nil)
@@ -74,7 +74,7 @@ func (tg *TelegramBot) commandUnwhite(b *gotgbot.Bot, ctx *ext.Context) error {
 		return err
 	}
 
-	err = tg.db.WhiteBiliUser(uid, false)
+	_, err = tg.db.WhiteBiliUser(uid, false)
 	if err != nil {
 		tg.sugar.Errorf("failed to unwhitelist user: %v", err)
 		_, err := ctx.EffectiveMessage.Reply(b, "数据库错误", nil)

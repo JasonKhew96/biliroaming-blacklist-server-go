@@ -21,48 +21,56 @@ type Database struct {
 
 // bilibili_users
 
-func (db *Database) UpsertBiliUser(biliUser *models.BilibiliUser) error {
-	return biliUser.Upsert(db.context, db.db, true, []string{"uid"}, boil.Whitelist("counter", "is_whitelist", "ban_until", "updated_at"), boil.Infer())
+func (db *Database) InsertBiliUser(biliUser *models.BilibiliUser) error {
+	return biliUser.Insert(db.context, db.db, boil.Infer())
 }
 
-func (db *Database) BanBiliUser(uid int64, banUntil time.Time) error {
+func (db *Database) UpdateBiliUser(biliUser *models.BilibiliUser) (int64, error) {
+	return biliUser.Update(db.context, db.db, boil.Infer())
+}
+
+func (db *Database) BanBiliUser(uid int64, banUntil time.Time) (int64, error) {
 	biliUser, err := db.GetBiliUser(uid)
 	if err != nil && err == sql.ErrNoRows {
-		return db.UpsertBiliUser(&models.BilibiliUser{
-			UID:       uid,
-			BanUntil:  null.TimeFrom(banUntil),
-			UpdatedAt: time.Now(),
+		return 1, db.InsertBiliUser(&models.BilibiliUser{
+			UID:      uid,
+			BanUntil: null.TimeFrom(banUntil),
 		})
 	} else if err != nil {
-		return err
+		return -1, err
 	}
 	biliUser.BanUntil = null.TimeFrom(banUntil)
-	return db.UpsertBiliUser(biliUser)
+	biliUser.UpdatedAt = time.Now()
+	return db.UpdateBiliUser(biliUser)
 }
 
-func (db *Database) UnbanBiliUser(uid int64) error {
+func (db *Database) UnbanBiliUser(uid int64) (int64, error) {
 	biliUser, err := db.GetBiliUser(uid)
-	if err != nil {
-		return err
+	if err != nil && err == sql.ErrNoRows {
+		return 1, db.InsertBiliUser(&models.BilibiliUser{
+			UID:      uid,
+			BanUntil: null.Time{},
+		})
+	} else if err != nil {
+		return -1, err
 	}
 	biliUser.BanUntil = null.TimeFrom(time.Time{})
 	biliUser.UpdatedAt = time.Now()
-	return db.UpsertBiliUser(biliUser)
+	return db.UpdateBiliUser(biliUser)
 }
 
-func (db *Database) WhiteBiliUser(uid int64, white bool) error {
+func (db *Database) WhiteBiliUser(uid int64, white bool) (int64, error) {
 	biliUser, err := db.GetBiliUser(uid)
 	if err != nil && err == sql.ErrNoRows {
-		return db.UpsertBiliUser(&models.BilibiliUser{
+		return 1, db.InsertBiliUser(&models.BilibiliUser{
 			UID:         uid,
 			IsWhitelist: white,
-			UpdatedAt:   time.Now(),
 		})
 	} else if err != nil {
-		return err
+		return -1, err
 	}
 	biliUser.IsWhitelist = white
-	return db.UpsertBiliUser(biliUser)
+	return db.UpdateBiliUser(biliUser)
 }
 
 func (db *Database) GetBiliUser(uid int64) (*models.BilibiliUser, error) {
@@ -72,10 +80,9 @@ func (db *Database) GetBiliUser(uid int64) (*models.BilibiliUser, error) {
 func (db *Database) IncBiliUserCounter(uid int64) (int64, error) {
 	biliUser, err := db.GetBiliUser(uid)
 	if err == sql.ErrNoRows {
-		if err := db.UpsertBiliUser(&models.BilibiliUser{
+		if err := db.InsertBiliUser(&models.BilibiliUser{
 			UID:       uid,
 			Counter:   1,
-			UpdatedAt: time.Now(),
 		}); err != nil {
 			return -1, err
 		}
@@ -88,7 +95,7 @@ func (db *Database) IncBiliUserCounter(uid int64) (int64, error) {
 	}
 	biliUser.Counter++
 	biliUser.UpdatedAt = time.Now()
-	return biliUser.Update(db.context, db.db, boil.Infer())
+	return db.UpdateBiliUser(biliUser)
 }
 
 // admins

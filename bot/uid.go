@@ -232,7 +232,7 @@ func (tg *TelegramBot) callbackUidResp(b *gotgbot.Bot, ctx *ext.Context) error {
 			return err
 		}
 		banUntil := time.Now().AddDate(0, months, 0)
-		if err := tg.db.BanBiliUser(uid, banUntil); err != nil {
+		if _, err := tg.db.BanBiliUser(uid, banUntil); err != nil {
 			tg.sugar.Errorf("failed to ban bilibili user: %v", err)
 			_, err = ctx.CallbackQuery.Answer(b, &gotgbot.AnswerCallbackQueryOpts{
 				Text:      "封禁失败",
@@ -270,7 +270,7 @@ func (tg *TelegramBot) callbackUidResp(b *gotgbot.Bot, ctx *ext.Context) error {
 		if err != nil {
 			return err
 		}
-		if err := tg.db.UnbanBiliUser(uid); err != nil {
+		if _, err := tg.db.UnbanBiliUser(uid); err != nil {
 			tg.sugar.Errorf("failed to unban bilibili user: %v", err)
 			_, err = ctx.CallbackQuery.Answer(b, &gotgbot.AnswerCallbackQueryOpts{
 				Text:      "解封失败",
