@@ -43,7 +43,8 @@ func (tg *TelegramBot) commandWhite(b *gotgbot.Bot, ctx *ext.Context) error {
 		return err
 	}
 
-	return nil
+	_, err = ctx.EffectiveMessage.Reply(b, "已添加至白名单", nil)
+	return err
 }
 
 func (tg *TelegramBot) commandUnwhite(b *gotgbot.Bot, ctx *ext.Context) error {
@@ -81,5 +82,6 @@ func (tg *TelegramBot) commandUnwhite(b *gotgbot.Bot, ctx *ext.Context) error {
 		return err
 	}
 
-	return nil
+	_, err = ctx.EffectiveMessage.Reply(b, "已移除白名单", nil)
+	return err
 }
