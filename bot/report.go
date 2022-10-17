@@ -153,6 +153,11 @@ func (tg *TelegramBot) commandReport(b *gotgbot.Bot, ctx *ext.Context) error {
 			ReplyMarkup: replyMarkup,
 		})
 	}
+	if err != nil {
+		return err
+	}
+
+	_, err = ctx.EffectiveMessage.Reply(b, "已提交举报", nil)
 	return err
 }
 
