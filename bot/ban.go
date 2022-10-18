@@ -65,9 +65,9 @@ func (tg *TelegramBot) commandBan(b *gotgbot.Bot, ctx *ext.Context) error {
 	location, _ := time.LoadLocation("Asia/Shanghai")
 	text := fmt.Sprintf("*已封禁*\nUID: `%d`\n昵称: [%s](https://space.bilibili.com/%d)\n将在 `%s` 后解除",
 		accInfo.Mid,
-		accInfo.Name,
+		EscapeMarkdownV2(accInfo.Name),
 		accInfo.Mid,
-		banUntil.In(location).Format(TIME_FORMAT),
+		EscapeMarkdownV2(banUntil.In(location).Format(TIME_FORMAT)),
 	)
 
 	_, err = ctx.EffectiveMessage.Reply(b, text, &gotgbot.SendMessageOpts{
@@ -120,7 +120,7 @@ func (tg *TelegramBot) commandUnban(b *gotgbot.Bot, ctx *ext.Context) error {
 
 	text := fmt.Sprintf("*已解除封禁*\nUID: `%d`\n昵称: [%s](https://space.bilibili.com/%d)\n",
 		accInfo.Mid,
-		accInfo.Name,
+		EscapeMarkdownV2(accInfo.Name),
 		accInfo.Mid,
 	)
 
