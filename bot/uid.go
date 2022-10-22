@@ -137,16 +137,12 @@ func (tg *TelegramBot) commandUid(b *gotgbot.Bot, ctx *ext.Context) error {
 		return nil
 	}
 
+	isAdmin := IsLevelAdmin(tg.GetUserAdminLevel(ctx.EffectiveSender.Id()))
+
 	msg := ctx.EffectiveMessage
 	if msg.Text == "" {
 		return nil
 	}
-
-	if !ctx.EffectiveSender.IsUser() {
-		return nil
-	}
-
-	isAdmin := IsLevelAdmin(tg.GetUserAdminLevel(ctx.EffectiveSender.Id()))
 
 	splits := strings.Split(msg.Text, " ")
 	if len(splits) <= 1 {
