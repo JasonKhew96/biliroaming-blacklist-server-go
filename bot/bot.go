@@ -59,6 +59,8 @@ func New(db *db.Database, config config.TelegramConfig, sugar *zap.SugaredLogger
 	dispatcher.AddHandler(handlers.NewCommand("alteradmin", tg.commandAlterAdmin))
 
 	// admin
+	dispatcher.AddHandler(handlers.NewCommand("key", tg.commandKey))
+
 	dispatcher.AddHandler(handlers.NewCommand("ban", tg.commandBan))
 	dispatcher.AddHandler(handlers.NewCommand("unban", tg.commandUnban))
 

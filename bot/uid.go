@@ -12,7 +12,14 @@ import (
 )
 
 func genUidInlineKeyboard(uid int64, isBlacklist, isAdmin bool) *gotgbot.InlineKeyboardMarkup {
-	inlineKeyboard := [][]gotgbot.InlineKeyboardButton{}
+	inlineKeyboard := [][]gotgbot.InlineKeyboardButton{
+		{
+			{
+				Text: "用户空间",
+				Url:  fmt.Sprintf("https://space.bilibili.com/%d", uid),
+			},
+		},
+	}
 	inlineKeyboard01 := []gotgbot.InlineKeyboardButton{
 		{
 			Text:         "查询记录",

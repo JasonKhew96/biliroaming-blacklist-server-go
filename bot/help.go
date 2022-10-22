@@ -21,6 +21,7 @@ func (tg *TelegramBot) commandHelp(b *gotgbot.Bot, ctx *ext.Context) error {
 	if IsLevelAdmin(userAdminLevel) {
 		text += `
 *管理员 专用*
+/key <access_key> \- 查询用户
 /ban <uid\> \[时长\] \- 封禁用户，默认三个月 \(1h/1d/1w/1m/1y\)
 /unban <uid\> \- 解封用户
 /white <uid\> \- 白名单用户

@@ -2,9 +2,11 @@ package utils
 
 import (
 	"biliroaming-blacklist-server-go/entity"
+	"crypto/md5"
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"net/url"
 	"strconv"
 	"strings"
 	"time"
@@ -55,6 +57,77 @@ func GetBiliAccInfo(uid int64) (*entity.SpaceAccInfoData, error) {
 	}
 
 	return data.Data, nil
+}
+
+func GetMyInfo(key string) (*entity.SpaceAccInfoData, error) {
+	values := url.Values{}
+	values.Set("access_key", key)
+
+	params, err := signParams(values)
+	if err != nil {
+		return nil, err
+	}
+
+	reqUrl := fmt.Sprintf("https://api.bilibili.com/x/space/myinfo?%s", params)
+
+	req, err := http.NewRequest(http.MethodGet, reqUrl, nil)
+	if err != nil {
+		return nil, err
+	}
+	req.Header.Set("Accept", "application/json")
+	req.Header.Set("User-Agent", USER_AGENT)
+	client := http.Client{
+		Timeout: 10 * time.Second,
+	}
+	resp, err := client.Do(req)
+	if err != nil {
+		return nil, err
+	}
+
+	defer resp.Body.Close()
+	if resp.StatusCode != http.StatusOK {
+		return nil, fmt.Errorf("http status code: %d", resp.StatusCode)
+	}
+	if !strings.Contains(resp.Header.Get("Content-Type"), "application/json") {
+		return nil, fmt.Errorf("content type: %s", resp.Header.Get("Content-Type"))
+	}
+
+	var data entity.SpaceAccInfo
+	err = json.NewDecoder(resp.Body).Decode(&data)
+	if err != nil {
+		return nil, err
+	}
+
+	if data.Code != 0 {
+		return nil, fmt.Errorf("code: %d, message: %s", data.Code, data.Message)
+	}
+
+	if data.Data == nil {
+		return nil, fmt.Errorf("data is nil")
+	}
+
+	return data.Data, nil
+}
+
+func signParams(values url.Values) (string, error) {
+	sign, err := getSign(values)
+	if err != nil {
+		return "", err
+	}
+	values.Set("sign", sign)
+	return values.Encode(), nil
+}
+
+func getSign(values url.Values) (string, error) {
+	appkey := "1d8b6e7d45233436"
+	appsec := "560c52ccd288fed045859ed18bffd973"
+
+	values.Set("ts", strconv.FormatInt(time.Now().Unix(), 10))
+	values.Set("appkey", appkey)
+
+	encoded := values.Encode() + appsec
+	data := []byte(encoded)
+	return fmt.Sprintf("%x", md5.Sum(data)), nil
 }
 
 func ParseDuration(duration string) (*time.Time, error) {
