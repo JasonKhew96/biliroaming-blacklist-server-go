@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/PaulSonOfLars/gotgbot/v2"
 	"github.com/PaulSonOfLars/gotgbot/v2/ext"
@@ -265,6 +266,16 @@ func (tg *TelegramBot) callbackReportResp(b *gotgbot.Bot, ctx *ext.Context) erro
 		if _, err = tg.db.InsertRecord(report.UID, report.Description, msg.Chat.Id, msg.MessageId, ctx.CallbackQuery.From.Id); err != nil {
 			tg.sugar.Errorf("failed to insert record: %v", err)
 			return err
+		}
+
+		user, err := tg.db.GetBiliUser(report.UID)
+		if err != nil || user.BanUntil.Valid && user.BanUntil.Time.Before(time.Now()) {
+			banUntil, _ := utils.ParseDuration("3m")
+
+			_, err = tg.db.BanBiliUser(report.UID, *banUntil)
+			if err != nil {
+				tg.sugar.Errorf("failed to ban user: %v", err)
+			}
 		}
 
 		if _, err = b.DeleteMessage(ctx.EffectiveChat.Id, ctx.EffectiveMessage.MessageId, nil); err != nil {
