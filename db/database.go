@@ -121,7 +121,7 @@ func (db *Database) GetUserRecords(uid int64) (models.RecordSlice, error) {
 }
 
 func (db *Database) GetTotalUser() (int64, error) {
-	return models.BilibiliUsers().Count(db.context, db.db)
+	return models.BilibiliUsers(models.BilibiliUserWhere.Counter.GT(0)).Count(db.context, db.db)
 }
 
 func (db *Database) GetTotalBannedUser() (int64, error) {
