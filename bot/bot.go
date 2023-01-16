@@ -4,8 +4,6 @@ import (
 	"biliroaming-blacklist-server-go/config"
 	"biliroaming-blacklist-server-go/db"
 	"fmt"
-	"log"
-	"os"
 	"strings"
 	"time"
 
@@ -40,15 +38,7 @@ func New(db *db.Database, config config.TelegramConfig, sugar *zap.SugaredLogger
 		ReportChatId:  config.ReportChatId,
 	}
 
-	updater := ext.NewUpdater(&ext.UpdaterOpts{
-		ErrorLog: log.New(os.Stderr, "ERROR: ", log.LstdFlags),
-		DispatcherOpts: ext.DispatcherOpts{
-			Error: func(b *gotgbot.Bot, ctx *ext.Context, err error) ext.DispatcherAction {
-				sugar.Errorln(err)
-				return ext.DispatcherActionNoop
-			},
-		},
-	})
+	updater := ext.NewUpdater(nil)
 	dispatcher := updater.Dispatcher
 
 	dispatcher.AddHandler(handlers.NewCommand("help", tg.commandHelp))
