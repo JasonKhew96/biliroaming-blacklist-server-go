@@ -89,7 +89,7 @@ func (w *Web) reportPost(c *fiber.Ctx) error {
 		return c.Render("report", fiberMap, "layouts/main")
 	}
 
-	accInfo, err := ut.GetBiliAccInfo(uid)
+	accInfo, err := ut.GetUserInfo(uid)
 	if err != nil {
 		fiberMap["Message"] = "获取用户信息失败"
 		return c.Render("report", fiberMap, "layouts/main")

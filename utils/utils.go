@@ -5,6 +5,7 @@ import (
 	"crypto/md5"
 	"encoding/json"
 	"fmt"
+	"log"
 	"net/http"
 	"net/url"
 	"strconv"
@@ -13,6 +14,16 @@ import (
 )
 
 const USER_AGENT = "Mozilla/5.0 (X11; Linux x86_64; rv:109.0) Gecko/20100101 Firefox/109.0"
+
+func GetUserInfo(uid int64) (*entity.SpaceAccInfoData, error) {
+	data, err := GetBiliAccInfo(uid)
+	if err != nil {
+		log.Println(err)
+	} else {
+		return data, nil
+	}
+	return GetCardByMid(uid)
+}
 
 func GetBiliAccInfo(uid int64) (*entity.SpaceAccInfoData, error) {
 	reqUrl := fmt.Sprintf("https://api.bilibili.com/x/space/acc/info?mid=%d", uid)
@@ -57,6 +68,51 @@ func GetBiliAccInfo(uid int64) (*entity.SpaceAccInfoData, error) {
 	}
 
 	return data.Data, nil
+}
+
+func GetCardByMid(uid int64) (*entity.SpaceAccInfoData, error) {
+	reqUrl := fmt.Sprintf("https://account.bilibili.com/api/member/getCardByMid?mid=%d", uid)
+	req, err := http.NewRequest(http.MethodGet, reqUrl, nil)
+	if err != nil {
+		return nil, err
+	}
+	req.Header.Set("Accept", "application/json")
+	req.Header.Set("User-Agent", USER_AGENT)
+	client := http.Client{
+		Timeout: 10 * time.Second,
+	}
+	resp, err := client.Do(req)
+	if err != nil {
+		return nil, err
+	}
+
+	defer resp.Body.Close()
+	if resp.StatusCode != http.StatusOK {
+		return nil, fmt.Errorf("http status code: %d", resp.StatusCode)
+	}
+	if !strings.Contains(resp.Header.Get("Content-Type"), "application/json") {
+		return nil, fmt.Errorf("content type: %s", resp.Header.Get("Content-Type"))
+	}
+
+	var data entity.CardByMid
+	err = json.NewDecoder(resp.Body).Decode(&data)
+	if err != nil {
+		return nil, err
+	}
+
+	if data.Code != 0 {
+		return nil, fmt.Errorf("code: %d, message: %s", data.Code, data.Message)
+	}
+
+	if data.Card == nil {
+		return nil, fmt.Errorf("data is nil")
+	}
+
+	if data.Card.Mid != uid {
+		return nil, fmt.Errorf("uid not match")
+	}
+
+	return data.Card, nil
 }
 
 func GetMyInfo(key string) (*entity.SpaceAccInfoData, error) {

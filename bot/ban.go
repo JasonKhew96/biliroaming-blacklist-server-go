@@ -39,7 +39,7 @@ func (tg *TelegramBot) commandBan(b *gotgbot.Bot, ctx *ext.Context) error {
 		return err
 	}
 
-	accInfo, err := utils.GetBiliAccInfo(uid)
+	accInfo, err := utils.GetUserInfo(uid)
 	if err != nil {
 		tg.sugar.Errorf("failed to get acc info: %v", err)
 		_, err := ctx.EffectiveMessage.Reply(b, "获取用户信息失败", nil)
@@ -104,7 +104,7 @@ func (tg *TelegramBot) commandUnban(b *gotgbot.Bot, ctx *ext.Context) error {
 		return err
 	}
 
-	accInfo, err := utils.GetBiliAccInfo(uid)
+	accInfo, err := utils.GetUserInfo(uid)
 	if err != nil {
 		tg.sugar.Errorf("failed to get acc info: %v", err)
 		_, err := ctx.EffectiveMessage.Reply(b, "获取用户信息失败", nil)

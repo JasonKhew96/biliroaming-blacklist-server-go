@@ -66,7 +66,7 @@ func (tg *TelegramBot) commandReport(b *gotgbot.Bot, ctx *ext.Context) error {
 	}
 	description := strings.Join(splits[2:], " ")
 
-	accInfo, err := utils.GetBiliAccInfo(uid)
+	accInfo, err := utils.GetUserInfo(uid)
 	if err != nil {
 		tg.sugar.Errorf("failed to get acc info: %v", err)
 		_, err := ctx.EffectiveMessage.Reply(b, fmt.Sprintf("获取用户信息失败: %s", err.Error()), nil)
@@ -220,7 +220,7 @@ func (tg *TelegramBot) callbackReportResp(b *gotgbot.Bot, ctx *ext.Context) erro
 			return err
 		}
 
-		accInfo, err := utils.GetBiliAccInfo(report.UID)
+		accInfo, err := utils.GetUserInfo(report.UID)
 		if err != nil {
 			tg.sugar.Errorf("failed to get bili acc info: %v", err)
 			_, err := ctx.CallbackQuery.Answer(b, &gotgbot.AnswerCallbackQueryOpts{
