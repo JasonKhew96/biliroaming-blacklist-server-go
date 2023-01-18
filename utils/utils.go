@@ -90,9 +90,9 @@ func GetCardByMid(uid int64) (*entity.SpaceAccInfoData, error) {
 	if resp.StatusCode != http.StatusOK {
 		return nil, fmt.Errorf("http status code: %d", resp.StatusCode)
 	}
-	if !strings.Contains(resp.Header.Get("Content-Type"), "application/json") {
-		return nil, fmt.Errorf("content type: %s", resp.Header.Get("Content-Type"))
-	}
+	// if !strings.Contains(resp.Header.Get("Content-Type"), "application/json") {
+	// 	return nil, fmt.Errorf("content type: %s", resp.Header.Get("Content-Type"))
+	// }
 
 	var data entity.CardByMid
 	err = json.NewDecoder(resp.Body).Decode(&data)
