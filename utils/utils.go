@@ -118,11 +118,19 @@ func GetCardByMid(uid int64) (*entity.SpaceAccInfoData, error) {
 		return nil, fmt.Errorf("data is nil")
 	}
 
-	if data.Card.Mid != uid {
+	mid, err := strconv.ParseInt(data.Card.Mid, 10, 64)
+	if err != nil {
+		return nil, err
+	}
+
+	if mid != uid {
 		return nil, fmt.Errorf("uid not match")
 	}
 
-	return data.Card, nil
+	return &entity.SpaceAccInfoData{
+		Mid:  mid,
+		Name: data.Card.Name,
+	}, nil
 }
 
 func GetMyInfo(key string) (*entity.SpaceAccInfoData, error) {

@@ -11,8 +11,13 @@ type SpaceAccInfo struct {
 	Data    *SpaceAccInfoData `json:"data,omitempty"`
 }
 
+type CardByMidCard struct {
+	Mid  string `json:"mid"`
+	Name string `json:"name"`
+}
+
 type CardByMid struct {
-	Code    int               `json:"code"`
-	Message string            `json:"message"`
-	Card    *SpaceAccInfoData `json:"card,omitempty"`
+	Code    int            `json:"code"`
+	Message string         `json:"message"`
+	Card    *CardByMidCard `json:"card,omitempty"`
 }
