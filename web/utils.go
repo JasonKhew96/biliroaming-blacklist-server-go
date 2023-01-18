@@ -3,6 +3,7 @@ package web
 import (
 	"encoding/json"
 	"fmt"
+	"io/ioutil"
 	"net/http"
 	"net/url"
 	"strings"
@@ -43,7 +44,11 @@ func (w *Web) verifyCaptchas(token, ip string) (bool, error) {
 		// Action      string    `json:"action"`
 		// CData       string    `json:"cdata"`
 	}
-	err = json.NewDecoder(resp.Body).Decode(&data)
+	rawByte, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return false, err
+	}
+	err = json.Unmarshal(rawByte, &data)
 	if err != nil {
 		return false, err
 	}

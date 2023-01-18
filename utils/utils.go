@@ -5,6 +5,7 @@ import (
 	"crypto/md5"
 	"encoding/json"
 	"fmt"
+	"io/ioutil"
 	"log"
 	"net/http"
 	"net/url"
@@ -49,8 +50,12 @@ func GetBiliAccInfo(uid int64) (*entity.SpaceAccInfoData, error) {
 		return nil, fmt.Errorf("content type: %s", resp.Header.Get("Content-Type"))
 	}
 
+	rawByte, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return nil, err
+	}
 	var data entity.SpaceAccInfo
-	err = json.NewDecoder(resp.Body).Decode(&data)
+	err = json.Unmarshal(rawByte, &data)
 	if err != nil {
 		return nil, err
 	}
@@ -94,8 +99,13 @@ func GetCardByMid(uid int64) (*entity.SpaceAccInfoData, error) {
 	// 	return nil, fmt.Errorf("content type: %s", resp.Header.Get("Content-Type"))
 	// }
 
+	rawByte, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return nil, err
+	}
+
 	var data entity.CardByMid
-	err = json.NewDecoder(resp.Body).Decode(&data)
+	err = json.Unmarshal(rawByte, &data)
 	if err != nil {
 		return nil, err
 	}
@@ -148,8 +158,13 @@ func GetMyInfo(key string) (*entity.SpaceAccInfoData, error) {
 		return nil, fmt.Errorf("content type: %s", resp.Header.Get("Content-Type"))
 	}
 
+	rawByte, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return nil, err
+	}
+
 	var data entity.SpaceAccInfo
-	err = json.NewDecoder(resp.Body).Decode(&data)
+	err = json.Unmarshal(rawByte, &data)
 	if err != nil {
 		return nil, err
 	}
