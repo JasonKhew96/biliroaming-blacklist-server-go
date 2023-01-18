@@ -66,20 +66,6 @@ func (tg *TelegramBot) commandReport(b *gotgbot.Bot, ctx *ext.Context) error {
 	}
 	description := strings.Join(splits[2:], " ")
 
-	accInfo, err := utils.GetUserInfo(uid)
-	if err != nil {
-		tg.sugar.Errorf("failed to get acc info: %v", err)
-		_, err := ctx.EffectiveMessage.Reply(b, fmt.Sprintf("获取用户信息失败: %s", err.Error()), nil)
-		return err
-	}
-
-	newText := fmt.Sprintf(
-		"*新举报*\nUID: `%d`\n昵称: [%s](https://space.bilibili.com/%d)\n描述:\n%s",
-		accInfo.Mid,
-		EscapeMarkdownV2(accInfo.Name), accInfo.Mid,
-		EscapeMarkdownV2(description),
-	)
-
 	var fileType int16
 	var fileId string
 
@@ -118,6 +104,20 @@ func (tg *TelegramBot) commandReport(b *gotgbot.Bot, ctx *ext.Context) error {
 		_, err := ctx.EffectiveMessage.Reply(b, "未找到证据", nil)
 		return err
 	}
+
+	accInfo, err := utils.GetUserInfo(uid)
+	if err != nil {
+		tg.sugar.Errorf("failed to get acc info: %v", err)
+		_, err := ctx.EffectiveMessage.Reply(b, fmt.Sprintf("获取用户信息失败: %s", err.Error()), nil)
+		return err
+	}
+
+	newText := fmt.Sprintf(
+		"*新举报*\nUID: `%d`\n昵称: [%s](https://space.bilibili.com/%d)\n描述:\n%s",
+		accInfo.Mid,
+		EscapeMarkdownV2(accInfo.Name), accInfo.Mid,
+		EscapeMarkdownV2(description),
+	)
 
 	reportId, err := tg.db.InsertReport(uid, description, fileType, fileId, fmt.Sprintf("TG@%d", ctx.EffectiveSender.Id()))
 	if err != nil {
