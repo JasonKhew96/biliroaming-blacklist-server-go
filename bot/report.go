@@ -270,7 +270,7 @@ func (tg *TelegramBot) callbackReportResp(b *gotgbot.Bot, ctx *ext.Context) erro
 
 		user, err := tg.db.GetBiliUser(report.UID)
 		if err != nil || user.BanUntil.IsZero() || !user.BanUntil.IsZero() && user.BanUntil.Time.Before(time.Now()) {
-			banUntil, _ := utils.ParseDuration("3m")
+			banUntil, _ := utils.ParseDuration(tg.DefaultBanTime)
 
 			_, err = tg.db.BanBiliUser(report.UID, *banUntil)
 			if err != nil {

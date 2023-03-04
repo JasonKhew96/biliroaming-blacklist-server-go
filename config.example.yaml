@@ -9,6 +9,7 @@ telegram:
   bot_token: 123456789:bot_token
   announce_chat_id: -100123456789
   report_chat_id: -100123456789
+  default_ban_time: 1y
 captchas:
   site_key:
   secret_key:

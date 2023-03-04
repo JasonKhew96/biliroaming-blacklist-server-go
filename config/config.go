@@ -18,6 +18,7 @@ type TelegramConfig struct {
 	BotToken       string `yaml:"bot_token"`
 	AnnounceChatId int64  `yaml:"announce_chat_id"`
 	ReportChatId   int64  `yaml:"report_chat_id"`
+	DefaultBanTime string `yaml:"default_ban_time"`
 }
 
 type CaptchasConfig struct {

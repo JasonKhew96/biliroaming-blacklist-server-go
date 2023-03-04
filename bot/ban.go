@@ -46,7 +46,7 @@ func (tg *TelegramBot) commandBan(b *gotgbot.Bot, ctx *ext.Context) error {
 		return err
 	}
 
-	banUntil, _ := utils.ParseDuration("3m")
+	banUntil, _ := utils.ParseDuration(tg.DefaultBanTime)
 	if len(splits) > 2 {
 		banUntil, err = utils.ParseDuration(splits[2])
 		if err != nil {

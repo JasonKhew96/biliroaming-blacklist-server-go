@@ -22,6 +22,8 @@ type TelegramBot struct {
 	Bot           *gotgbot.Bot
 	AnnouceChatId int64
 	ReportChatId  int64
+
+	DefaultBanTime string
 }
 
 func New(db *db.Database, config config.TelegramConfig, sugar *zap.SugaredLogger) (*TelegramBot, error) {
@@ -31,11 +33,12 @@ func New(db *db.Database, config config.TelegramConfig, sugar *zap.SugaredLogger
 	}
 
 	tg := &TelegramBot{
-		sugar:         sugar,
-		db:            db,
-		Bot:           bot,
-		AnnouceChatId: config.AnnounceChatId,
-		ReportChatId:  config.ReportChatId,
+		sugar:          sugar,
+		db:             db,
+		Bot:            bot,
+		AnnouceChatId:  config.AnnounceChatId,
+		ReportChatId:   config.ReportChatId,
+		DefaultBanTime: config.DefaultBanTime,
 	}
 
 	updater := ext.NewUpdater(nil)
