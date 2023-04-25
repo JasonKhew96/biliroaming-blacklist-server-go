@@ -28,6 +28,7 @@ type Web struct {
 	tg  *bot.TelegramBot
 
 	config config.CaptchasConfig
+	auth   string
 }
 
 func (w *Web) index(c *fiber.Ctx) error {
@@ -36,7 +37,7 @@ func (w *Web) index(c *fiber.Ctx) error {
 	}, "layouts/main")
 }
 
-func New(db *db.Database, tg *bot.TelegramBot, port int, conf config.CaptchasConfig, sugar *zap.SugaredLogger) {
+func New(db *db.Database, tg *bot.TelegramBot, port int, conf config.CaptchasConfig, auth string, sugar *zap.SugaredLogger) {
 	engine := html.New("./views", ".html")
 
 	app := fiber.New(fiber.Config{
@@ -53,6 +54,7 @@ func New(db *db.Database, tg *bot.TelegramBot, port int, conf config.CaptchasCon
 		app:    app,
 		tg:     tg,
 		config: conf,
+		auth:   auth,
 	}
 
 	app.Get("/", web.index)

@@ -68,5 +68,10 @@ func (w *Web) usersUid(c *fiber.Ctx) error {
 		BanUntil:    0,
 	}
 
+	if utils.EqualFoldBytes(c.Request().Header.Peek(fiber.HeaderAuthorization), []byte(w.auth)) {
+		resp.Data.Counter = user.Counter
+		resp.Data.LastAccessed = user.UpdatedAt.Unix()
+	}
+
 	return c.JSON(resp)
 }

@@ -27,7 +27,8 @@ type CaptchasConfig struct {
 }
 
 type Config struct {
-	Port           int `yaml:"port"`
+	Port           int    `yaml:"port"`
+	Auth           string `yaml:"auth"`
 	DatabaseConfig `yaml:"database"`
 	TelegramConfig `yaml:"telegram"`
 	CaptchasConfig `yaml:"captchas"`

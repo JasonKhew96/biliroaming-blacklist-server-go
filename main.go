@@ -29,5 +29,5 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	web.New(db, tg, config.Port, config.CaptchasConfig, sugar)
+	web.New(db, tg, config.Port, config.CaptchasConfig, config.Auth, sugar)
 }
