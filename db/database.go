@@ -79,8 +79,8 @@ func (db *Database) IncBiliUserCounter(uid int64) (int64, error) {
 	biliUser, err := db.GetBiliUser(uid)
 	if err == sql.ErrNoRows {
 		if err := db.InsertBiliUser(&models.BilibiliUser{
-			UID:       uid,
-			Counter:   1,
+			UID:     uid,
+			Counter: 1,
 		}); err != nil {
 			return -1, err
 		}
@@ -122,6 +122,10 @@ func (db *Database) GetUserRecords(uid int64) (models.RecordSlice, error) {
 
 func (db *Database) GetTotalUser() (int64, error) {
 	return models.BilibiliUsers(models.BilibiliUserWhere.Counter.GT(0)).Count(db.context, db.db)
+}
+
+func (db *Database) GetTotalActiveUser() (int64, error) {
+	return models.BilibiliUsers(models.BilibiliUserWhere.RequestedAt.GT(time.Now().Add(-24*14*time.Hour))).Count(db.context, db.db)
 }
 
 func (db *Database) GetTotalBannedUser() (int64, error) {
