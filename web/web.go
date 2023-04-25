@@ -4,6 +4,7 @@ import (
 	"biliroaming-blacklist-server-go/bot"
 	"biliroaming-blacklist-server-go/config"
 	"biliroaming-blacklist-server-go/db"
+	"biliroaming-blacklist-server-go/utils"
 	"context"
 	"fmt"
 	"time"
@@ -38,7 +39,7 @@ func (w *Web) index(c *fiber.Ctx) error {
 }
 
 func New(db *db.Database, tg *bot.TelegramBot, port int, conf config.CaptchasConfig, auth string, sugar *zap.SugaredLogger) {
-	engine := html.New("./views", ".html")
+	engine := html.New("./views", ".html").AddFunc("convertNextLine", utils.ConvertNextLine)
 
 	app := fiber.New(fiber.Config{
 		Views:        engine,

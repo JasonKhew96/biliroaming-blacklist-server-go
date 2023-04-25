@@ -5,6 +5,7 @@ import (
 	"crypto/md5"
 	"encoding/json"
 	"fmt"
+	"html/template"
 	"io/ioutil"
 	"log"
 	"net/http"
@@ -243,4 +244,8 @@ func ParseDuration(duration string) (*time.Time, error) {
 	default:
 		return nil, fmt.Errorf("invalid duration unit: %s", unit)
 	}
+}
+
+func ConvertNextLine(s string) template.HTML {
+	return template.HTML(strings.ReplaceAll(s, "\n", "<br>"))
 }

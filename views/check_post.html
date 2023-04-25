@@ -24,7 +24,7 @@
         {{ range .Records }}
         <tr>
             <td>{{ .Time }}</td>
-            <td>{{ .Description }}</td>
+            <td>{{ convertNextLine .Description }}</td>
         </tr>
         {{ end }}
     </tbody>
