@@ -74,8 +74,6 @@ func (w *Web) checkPost(c *fiber.Ctx) error {
 
 	if user.BanUntil.Valid && user.BanUntil.Time.After(time.Now()) {
 		fiberMap["BanUntil"] = user.BanUntil.Time.In(location).Format("2006-01-02 15:04:05")
-
-		return c.Render("check_post", fiberMap, "layouts/main")
 	}
 
 	return c.Render("check_post", fiberMap, "layouts/main")
