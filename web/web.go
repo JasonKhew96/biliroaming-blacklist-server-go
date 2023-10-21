@@ -39,7 +39,8 @@ func (w *Web) index(c *fiber.Ctx) error {
 }
 
 func New(db *db.Database, tg *bot.TelegramBot, port int, conf config.CaptchasConfig, auth string, sugar *zap.SugaredLogger) {
-	engine := html.New("./views", ".html").AddFunc("convertNextLine", utils.ConvertNextLine)
+	engine := html.New("./views", ".html")
+	engine.AddFunc("convertNextLine", utils.ConvertNextLine)
 
 	app := fiber.New(fiber.Config{
 		Views:        engine,

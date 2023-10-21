@@ -86,7 +86,7 @@ func New(db *db.Database, config config.TelegramConfig, sugar *zap.SugaredLogger
 
 	err = updater.StartPolling(bot, &ext.PollingOpts{
 		DropPendingUpdates: true,
-		GetUpdatesOpts: gotgbot.GetUpdatesOpts{
+		GetUpdatesOpts: &gotgbot.GetUpdatesOpts{
 			Timeout: 60,
 			RequestOpts: &gotgbot.RequestOpts{
 				Timeout: time.Second * 60,
