@@ -32,7 +32,7 @@ func GetUserInfo(uid int64) (*entity.SpaceAccInfoData, error) {
 }
 
 func GetBiliAccInfo(uid int64) (*entity.SpaceAccInfoData, error) {
-	reqUrl := fmt.Sprintf("https://api.bilibili.com/x/space/acc/info?mid=%d", uid)
+	reqUrl := fmt.Sprintf("https://api.bilibili.com/x/space/wbi/acc/info?mid=%d", uid)
 	signedReqUrl, err := signAndGenerateURL(reqUrl)
 	if err != nil {
 		return nil, err
