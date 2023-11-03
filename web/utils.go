@@ -3,7 +3,7 @@ package web
 import (
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"net/url"
 	"strings"
@@ -37,14 +37,14 @@ func (w *Web) verifyCaptchas(token, ip string) (bool, error) {
 		return false, fmt.Errorf("content type: %s", resp.Header.Get("Content-Type"))
 	}
 	var data struct {
-		Success     bool      `json:"success"`
+		Success bool `json:"success"`
 		// ChallengeTs time.Time `json:"challenge_ts"`
 		// Hostname    string    `json:"hostname"`
 		// ErrorCodes  []string  `json:"error-codes"`
 		// Action      string    `json:"action"`
 		// CData       string    `json:"cdata"`
 	}
-	rawByte, err := ioutil.ReadAll(resp.Body)
+	rawByte, err := io.ReadAll(resp.Body)
 	if err != nil {
 		return false, err
 	}

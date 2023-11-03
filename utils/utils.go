@@ -9,7 +9,6 @@ import (
 	"fmt"
 	"html/template"
 	"io"
-	"io/ioutil"
 	"log"
 	"net/http"
 	"net/url"
@@ -60,7 +59,7 @@ func GetBiliAccInfo(uid int64) (*entity.SpaceAccInfoData, error) {
 		return nil, fmt.Errorf("content type: %s", resp.Header.Get("Content-Type"))
 	}
 
-	rawByte, err := ioutil.ReadAll(resp.Body)
+	rawByte, err := io.ReadAll(resp.Body)
 	if err != nil {
 		return nil, err
 	}
@@ -109,7 +108,7 @@ func GetCardByMid(uid int64) (*entity.SpaceAccInfoData, error) {
 	// 	return nil, fmt.Errorf("content type: %s", resp.Header.Get("Content-Type"))
 	// }
 
-	rawByte, err := ioutil.ReadAll(resp.Body)
+	rawByte, err := io.ReadAll(resp.Body)
 	if err != nil {
 		return nil, err
 	}
@@ -176,7 +175,7 @@ func GetMyInfo(key string) (*entity.SpaceAccInfoData, error) {
 		return nil, fmt.Errorf("content type: %s", resp.Header.Get("Content-Type"))
 	}
 
-	rawByte, err := ioutil.ReadAll(resp.Body)
+	rawByte, err := io.ReadAll(resp.Body)
 	if err != nil {
 		return nil, err
 	}
