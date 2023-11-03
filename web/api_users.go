@@ -28,15 +28,6 @@ func (w *Web) usersUid(c *fiber.Ctx) error {
 		w.db.IncBiliUserCounter(uid)
 	}
 
-	isBlocked := false
-	now := time.Now()
-	weekday := now.Weekday()
-	hour, minute, _ := now.UTC().Clock()
-	if weekday == time.Wednesday && ((hour == 11 && minute >= 45) || (hour == 12 && minute < 45)) {
-		isBlocked = true
-	}
-	banUntil := time.Date(now.Year(), now.Month(), now.Day(), 12, 45, 0, 0, time.UTC)
-
 	user, err := w.db.GetBiliUser(uid)
 	if err != nil {
 		resp.Data = &entity.RespStatusData{
@@ -45,11 +36,6 @@ func (w *Web) usersUid(c *fiber.Ctx) error {
 			IsWhitelist: false,
 			Status:      StatusNone,
 			BanUntil:    0,
-		}
-		if isBlocked {
-			resp.Data.IsBlacklist = true
-			resp.Data.Status = StatusBlacklist
-			resp.Data.BanUntil = banUntil.Unix()
 		}
 		return c.JSON(resp)
 	}
@@ -85,12 +71,6 @@ func (w *Web) usersUid(c *fiber.Ctx) error {
 	if utils.EqualFoldBytes(c.Request().Header.Peek(fiber.HeaderAuthorization), []byte(w.auth)) {
 		resp.Data.Counter = user.Counter
 		resp.Data.LastRequested = user.RequestedAt.Unix()
-	}
-
-	if isBlocked {
-		resp.Data.IsBlacklist = true
-		resp.Data.Status = StatusBlacklist
-		resp.Data.BanUntil = banUntil.Unix()
 	}
 
 	return c.JSON(resp)
