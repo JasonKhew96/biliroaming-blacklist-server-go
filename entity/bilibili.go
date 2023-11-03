@@ -21,3 +21,14 @@ type CardByMid struct {
 	Message string         `json:"message"`
 	Card    *CardByMidCard `json:"card,omitempty"`
 }
+
+type Nav struct {
+	Code    int    `json:"code"`
+	Message string `json:"message"`
+	Data    struct {
+		WbiImg struct {
+			ImgUrl string `json:"img_url"`
+			SubUrl string `json:"sub_url"`
+		} `json:"wbi_img"`
+	} `json:"data"`
+}
